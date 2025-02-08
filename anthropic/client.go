@@ -1,6 +1,7 @@
 package anthropic
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -21,6 +22,7 @@ type CompletionRequest struct {
 	Model     string    `json:"model"`
 	Messages  []Message `json:"messages"`
 	MaxTokens int       `json:"max_tokens"`
+	Stream    bool      `json:"stream"`
 }
 
 type Message struct {
@@ -63,7 +65,8 @@ func NewClient(apiKey string) *Client {
 
 func (c *Client) Complete(prompt, document string) (string, error) {
 	req := CompletionRequest{
-		Model: "claude-3-5-sonnet-20241022",
+		Model:  "claude-3-5-sonnet-20241022",
+		Stream: true,
 		Messages: []Message{
 			{
 				Role: "user",
@@ -75,7 +78,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 				},
 			},
 		},
-		MaxTokens: 1024,
+		MaxTokens: 8192,
 	}
 
 	jsonData, err := json.Marshal(req)
@@ -98,22 +101,46 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 	}
 	defer response.Body.Close()
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return "", fmt.Errorf("error reading response: %w", err)
+	reader := bufio.NewReader(response.Body)
+	for {
+		line, err := reader.ReadBytes('\n')
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return "", fmt.Errorf("error reading stream: %w", err)
+		}
+
+		if len(line) == 0 {
+			continue
+		}
+
+		if !bytes.HasPrefix(line, []byte("data: ")) {
+			continue
+		}
+
+		data := bytes.TrimPrefix(line, []byte("data: "))
+
+		if string(data) == "[DONE]\n" {
+			break
+		}
+
+		fmt.Print(string(data))
 	}
 
-	fmt.Println(string(body))
+	//fmt.Println(string(body))
 
-	var result map[string]any
-	if err := json.Unmarshal(body, &result); err != nil {
-		return "", fmt.Errorf("error unmarshaling response: %w", err)
-	}
+	/*
+		var result map[string]any
+		if err := json.Unmarshal(body, &result); err != nil {
+			return "", fmt.Errorf("error unmarshaling response: %w", err)
+		}
 
-	contents := result["content"].([]any)
-	content := contents[0].(map[string]any)
-	t := content["text"].(string)
-	fmt.Println(t)
-
+		contents := result["content"].([]any)
+		content := contents[0].(map[string]any)
+		t := content["text"].(string)
+		fmt.Println(t)
+	*/
+	t := ""
 	return t, nil
 }
