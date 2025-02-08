@@ -33,6 +33,6 @@ func main() {
 			continue
 		}
 
-		fmt.Println("Response:", response.Content)
+		fmt.Println("Response:", response)
 	}
 }

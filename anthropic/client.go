@@ -45,7 +45,7 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
-func (c *Client) Complete(prompt string) (*CompletionResponse, error) {
+func (c *Client) Complete(prompt string) (map[string]any, error) {
 	req := CompletionRequest{
 		Model: "claude-3-5-sonnet-20241022",
 		Messages: []Message{
@@ -82,14 +82,12 @@ func (c *Client) Complete(prompt string) (*CompletionResponse, error) {
 		return nil, fmt.Errorf("error reading response: %w", err)
 	}
 
-	var result CompletionResponse
+	var result map[string]any
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
-	if result.Error != nil {
-		return nil, fmt.Errorf("API error: %s (%s)", result.Error.Message, result.Error.Type)
-	}
+	fmt.Println(result)
 
-	return &result, nil
+	return result, nil
 }
