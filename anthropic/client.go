@@ -17,15 +17,27 @@ type Client struct {
 	HTTPClient *http.Client
 }
 
-type Message struct {
-	Role    string `json:"role"`
-	Content string `json:"content"`
-}
-
 type CompletionRequest struct {
 	Model     string    `json:"model"`
 	Messages  []Message `json:"messages"`
 	MaxTokens int       `json:"max_tokens"`
+}
+
+type Message struct {
+	Role    string    `json:"role"`
+	Content []Content `json:"content"`
+}
+
+type Content struct {
+	Type   string      `json:"type"`
+	Text   string      `json:"text,omitempty"`
+	Source *FileSource `json:"source,omitempty"`
+}
+
+type FileSource struct {
+	Type      string `json:"type"`
+	MediaType string `json:"media_type"`
+	Data      string `json:"data"`
 }
 
 type CompletionResponse struct {
@@ -45,13 +57,22 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
-func (c *Client) Complete(prompt string) (string, error) {
+func (c *Client) Complete(prompt, document string) (string, error) {
 	req := CompletionRequest{
 		Model: "claude-3-5-sonnet-20241022",
 		Messages: []Message{
 			{
-				Role:    "user",
-				Content: prompt,
+				Role: "user",
+				Content: []Content{
+					{
+						Type: "text",
+						Text: "Please review this Go code and suggest improvements:",
+					},
+					{
+						Type: "document",
+						Text: document,
+					},
+				},
 			},
 		},
 		MaxTokens: 1024,
@@ -81,6 +102,8 @@ func (c *Client) Complete(prompt string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error reading response: %w", err)
 	}
+
+	fmt.Println(string(body))
 
 	var result map[string]any
 	if err := json.Unmarshal(body, &result); err != nil {

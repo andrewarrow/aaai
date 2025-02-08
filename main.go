@@ -18,6 +18,8 @@ func main() {
 	client := anthropic.NewClient(apiKey)
 	scanner := bufio.NewScanner(os.Stdin)
 
+	goFile, _ := os.ReadFile("main.go")
+
 	for {
 		fmt.Print("> ")
 		scanner.Scan()
@@ -27,7 +29,7 @@ func main() {
 			break
 		}
 
-		response, err := client.Complete(input)
+		response, err := client.Complete(input, string(goFile))
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
