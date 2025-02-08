@@ -29,12 +29,16 @@ type Message struct {
 }
 
 type Content struct {
-	Type   string      `json:"type"`
-	Text   string      `json:"text,omitempty"`
-	Source *FileSource `json:"source,omitempty"`
+	Type     string    `json:"type"`
+	Text     string    `json:"text,omitempty"`
+	Document *Document `json:"document,omitempty"`
 }
 
-type FileSource struct {
+type Document struct {
+	Source Source `json:"source"`
+}
+
+type Source struct {
 	Type      string `json:"type"`
 	MediaType string `json:"media_type"`
 	Data      string `json:"data"`
@@ -66,11 +70,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 				Content: []Content{
 					{
 						Type: "text",
-						Text: "Please review this Go code and suggest improvements:",
-					},
-					{
-						Type: "document",
-						Text: document,
+						Text: "Please review this Go code and suggest improvements: " + document,
 					},
 				},
 			},
@@ -117,3 +117,89 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 
 	return t, nil
 }
+
+type Request struct {
+	Messages           []Message    `json:"messages"`
+	Model              string       `json:"model"`
+	Prompt             string       `json:"prompt"`
+	ParentMessageUUID  string       `json:"parent_message_uuid"`
+	Timezone           string       `json:"timezone"`
+	PersonalizedStyles []Style      `json:"personalized_styles"`
+	Tools              []Tool       `json:"tools"`
+	Attachments        []Attachment `json:"attachments"`
+	Files              []any        `json:"files"`
+	SyncSources        []any        `json:"sync_sources"`
+	RenderingMode      string       `json:"rendering_mode"`
+	MaxTokens          int          `json:"max_tokens"`
+}
+
+type Style struct {
+	Name      string `json:"name"`
+	Prompt    string `json:"prompt"`
+	Summary   string `json:"summary"`
+	IsDefault bool   `json:"isDefault"`
+	Type      string `json:"type"`
+	Key       string `json:"key"`
+}
+
+type Tool struct {
+	Type string `json:"type"`
+	Name string `json:"name"`
+}
+
+type Attachment struct {
+	FileName         string `json:"file_name"`
+	FileType         string `json:"file_type"`
+	FileSize         int    `json:"file_size"`
+	ExtractedContent string `json:"extracted_content"`
+}
+
+/*
+func makeRequest(goFile string) []byte {
+	req := Request{
+		Model:  "claude-3-5-sonnet-20241022",
+		Prompt: "what is this file?",
+		//ParentMessageUUID: "00000000-0000-4000-8000-000000000000",
+		Timezone: "America/Los_Angeles",
+		PersonalizedStyles: []Style{
+			{
+				Name:      "Normal",
+				Prompt:    "Normal",
+				Summary:   "Default responses from Claude",
+				IsDefault: true,
+				Type:      "default",
+				Key:       "Default",
+			},
+		},
+		Tools: []Tool{
+			{Type: "text_editor_20250124", Name: "str_replace_editor"},
+		},
+		Messages: []Message{
+			{
+				Role: "user",
+				Content: []Content{
+					{
+						Type: "text",
+						Text: "Please review this Go code and suggest improvements:",
+					},
+				},
+			},
+		},
+		MaxTokens: 1024,
+		Attachments: []Attachment{
+			{
+				FileName:         "main.go",
+				FileType:         "text/plain",
+				FileSize:         643,
+				ExtractedContent: goFile,
+			},
+		},
+		Files:         []interface{}{},
+		SyncSources:   []interface{}{},
+		RenderingMode: "messages",
+	}
+
+	data, _ := json.Marshal(req)
+	return data
+
+}*/
