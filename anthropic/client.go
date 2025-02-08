@@ -45,7 +45,7 @@ func NewClient(apiKey string) *Client {
 	}
 }
 
-func (c *Client) Complete(prompt string) (map[string]any, error) {
+func (c *Client) Complete(prompt string) (string, error) {
 	req := CompletionRequest{
 		Model: "claude-3-5-sonnet-20241022",
 		Messages: []Message{
@@ -59,12 +59,12 @@ func (c *Client) Complete(prompt string) (map[string]any, error) {
 
 	jsonData, err := json.Marshal(req)
 	if err != nil {
-		return nil, fmt.Errorf("error marshaling request: %w", err)
+		return "", fmt.Errorf("error marshaling request: %w", err)
 	}
 
 	request, err := http.NewRequest("POST", DefaultAPIEndpoint, bytes.NewBuffer(jsonData))
 	if err != nil {
-		return nil, fmt.Errorf("error creating request: %w", err)
+		return "", fmt.Errorf("error creating request: %w", err)
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -73,21 +73,24 @@ func (c *Client) Complete(prompt string) (map[string]any, error) {
 
 	response, err := c.HTTPClient.Do(request)
 	if err != nil {
-		return nil, fmt.Errorf("error making request: %w", err)
+		return "", fmt.Errorf("error making request: %w", err)
 	}
 	defer response.Body.Close()
 
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return nil, fmt.Errorf("error reading response: %w", err)
+		return "", fmt.Errorf("error reading response: %w", err)
 	}
 
 	var result map[string]any
 	if err := json.Unmarshal(body, &result); err != nil {
-		return nil, fmt.Errorf("error unmarshaling response: %w", err)
+		return "", fmt.Errorf("error unmarshaling response: %w", err)
 	}
 
-	fmt.Println(result)
+	contents := result["content"].([]any)
+	content := contents[0].(map[string]any)
+	t := content["text"].(string)
+	fmt.Println(t)
 
-	return result, nil
+	return t, nil
 }
