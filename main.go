@@ -9,6 +9,12 @@ import (
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("./aaai [dir]")
+		return
+	}
+	dir := os.Args[1]
+
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
 		fmt.Println("Please set ANTHROPIC_API_KEY environment variable")
@@ -18,7 +24,7 @@ func main() {
 	client := anthropic.NewClient(apiKey)
 	scanner := bufio.NewScanner(os.Stdin)
 
-	goFile, _ := os.ReadFile("main.go")
+	goFile, _ := os.ReadFile(dir + "/main.go")
 
 	for {
 		fmt.Print("> ")
