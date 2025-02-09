@@ -102,6 +102,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 	defer response.Body.Close()
 
 	reader := bufio.NewReader(response.Body)
+	parser := NewStreamParser()
 	for {
 		line, err := reader.ReadBytes('\n')
 		if err == io.EOF {
@@ -124,9 +125,12 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 		if string(data) == "[DONE]\n" {
 			break
 		}
+		parser.ProcessLine(string(data))
 
 		fmt.Print(string(data))
 	}
+	s := parser.Result()
+	fmt.Println(s)
 
 	//fmt.Println(string(body))
 
