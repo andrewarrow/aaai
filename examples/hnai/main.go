@@ -26,7 +26,7 @@ func generateRandomString(length int) string {
 }
 
 func initialModel() model {
-	strings := make([]string, 30)
+	strings := make([]string, 20)
 	for i := range strings {
 		strings[i] = generateRandomString(10)
 	}
@@ -65,24 +65,31 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	s := strings.Builder{}
 
+	tableStyle := lipgloss.NewStyle().
+		Border(lipgloss.NormalBorder()).
+		Width((m.width * 80) / 100 - 4).
+		Height((m.height * 80) / 100 - 2)
+
 	style := lipgloss.NewStyle().
-		Width(m.width).
+		Width((m.width * 80) / 100 - 6).
 		Height(1)
 
 	selectedStyle := lipgloss.NewStyle().
-		Width(m.width).
+		Width((m.width * 80) / 100 - 6).
 		Height(1).
 		Background(lipgloss.Color("5"))
 
+	content := strings.Builder{}
 	for i, str := range m.strings {
 		if i == m.cursor {
-			s.WriteString(selectedStyle.Render(str))
+			content.WriteString(selectedStyle.Render(str))
 		} else {
-			s.WriteString(style.Render(str))
+			content.WriteString(style.Render(str))
 		}
-		s.WriteString("\n")
+		content.WriteString("\n")
 	}
 
+	s.WriteString(tableStyle.Render(content.String()))
 	s.WriteString("\nPress q to quit")
 	return s.String()
 }

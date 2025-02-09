@@ -43,6 +43,7 @@ func main() {
 
 		os.Remove(file)
 		os.WriteFile(file, []byte(s), 0644)
+		fmt.Println("")
 
 	}
 }
