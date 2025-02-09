@@ -23,10 +23,10 @@ func main() {
 
 	client := anthropic.NewClient(apiKey)
 	scanner := bufio.NewScanner(os.Stdin)
-
-	goFile, _ := os.ReadFile(dir + "/main.go")
+	file := dir + "/main.go"
 
 	for {
+		goFile, _ := os.ReadFile(dir + "/main.go")
 		fmt.Print("> ")
 		scanner.Scan()
 		input := strings.TrimSpace(scanner.Text())
@@ -35,12 +35,14 @@ func main() {
 			break
 		}
 
-		response, err := client.Complete(input, string(goFile))
+		s, err := client.Complete(input, string(goFile))
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
 		}
 
-		fmt.Println("Response:", response)
+		os.Remove(file)
+		os.WriteFile(file, []byte(s), 0644)
+
 	}
 }

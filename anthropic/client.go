@@ -126,25 +126,6 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 			break
 		}
 		parser.ProcessLine(string(data))
-
-		//fmt.Print(string(data))
 	}
-	s := parser.Result()
-	fmt.Println(len(s))
-
-	//fmt.Println(string(body))
-
-	/*
-		var result map[string]any
-		if err := json.Unmarshal(body, &result); err != nil {
-			return "", fmt.Errorf("error unmarshaling response: %w", err)
-		}
-
-		contents := result["content"].([]any)
-		content := contents[0].(map[string]any)
-		t := content["text"].(string)
-		fmt.Println(t)
-	*/
-	t := ""
-	return t, nil
+	return parser.Result(), nil
 }
