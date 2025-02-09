@@ -35,7 +35,7 @@ func main() {
 			break
 		}
 
-		s, err := client.Complete(input, string(goFile))
+		s, err := client.Complete(input, "main.go\n"+string(goFile))
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
