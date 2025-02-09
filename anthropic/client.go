@@ -127,10 +127,10 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 		}
 		parser.ProcessLine(string(data))
 
-		fmt.Print(string(data))
+		//fmt.Print(string(data))
 	}
 	s := parser.Result()
-	fmt.Println(s)
+	fmt.Println(len(s))
 
 	//fmt.Println(string(body))
 

@@ -17,13 +17,13 @@ func NewStreamParser() *StreamParser {
 func (p *StreamParser) ProcessLine(line string) error {
 
 	var m map[string]any
-	fmt.Println(line)
 
 	json.Unmarshal([]byte(line), &m)
 	if m["type"] == "content_block_delta" {
 
 		d := m["delta"].(map[string]any)
 		s := d["text"].(string)
+		fmt.Print(s)
 		p.buffer.WriteString(s)
 	}
 
