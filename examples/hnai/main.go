@@ -1,27 +1,7 @@
-main.go
 package main
 
 import (
 	"fmt"
-
-	tea "github.com/charmbracelet/bubbletea"
-)
-
-func main() {
-	p := tea.NewProgram(
-		initialModel(),
-		tea.WithAltScreen(),
-	)
-
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error running program: %v", err)
-	}
-}
----------
-model.go
-package main
-
-import (
 	"math/rand"
 	"strings"
 
@@ -87,15 +67,15 @@ func (m model) View() string {
 
 	tableStyle := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
-		Width((m.width * 80) / 100 - 4).
-		Height((m.height * 80) / 100 - 2)
+		Width((m.width*80)/100 - 4).
+		Height((m.height*80)/100 - 2)
 
 	style := lipgloss.NewStyle().
-		Width((m.width * 80) / 100 - 6).
+		Width((m.width*80)/100 - 6).
 		Height(1)
 
 	selectedStyle := lipgloss.NewStyle().
-		Width((m.width * 80) / 100 - 6).
+		Width((m.width*80)/100 - 6).
 		Height(1).
 		Background(lipgloss.Color("5"))
 
@@ -112,4 +92,15 @@ func (m model) View() string {
 	s.WriteString(tableStyle.Render(content.String()))
 	s.WriteString("\nPress q to quit")
 	return s.String()
+}
+
+func main() {
+	p := tea.NewProgram(
+		initialModel(),
+		tea.WithAltScreen(),
+	)
+
+	if _, err := p.Run(); err != nil {
+		fmt.Printf("Error running program: %v", err)
+	}
 }

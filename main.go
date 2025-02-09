@@ -26,7 +26,7 @@ func main() {
 	file := dir + "/main.go"
 
 	for {
-		goFile, _ := os.ReadFile(dir + "/main.go")
+		goFile, _ := os.ReadFile(file)
 		fmt.Print("> ")
 		scanner.Scan()
 		input := strings.TrimSpace(scanner.Text())
@@ -41,8 +41,15 @@ func main() {
 			continue
 		}
 
-		os.Remove(file)
-		os.WriteFile(file, []byte(s), 0644)
+		files := strings.Split(s, "---------")
+		for _, f := range files {
+			lines := strings.Split(f, "\n")
+			newFile := dir + "/" + lines[0]
+			content := strings.Join(lines[1:], "\n")
+
+			os.Remove(newFile)
+			os.WriteFile(newFile, []byte(content), 0644)
+		}
 		fmt.Println("")
 
 	}
