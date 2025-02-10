@@ -36,6 +36,9 @@ func main() {
 			break
 		}
 
+		file, _ := os.OpenFile(".aaai.input.history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		file.Write([]byte(input + "\n"))
+
 		fmt.Println(oneOrMoreFiles)
 		s, err := client.Complete(input, oneOrMoreFiles)
 		if err != nil {
@@ -43,7 +46,7 @@ func main() {
 			continue
 		}
 
-		fmt.Println("")
+		fmt.Println("\n================\n")
 
 		files := strings.Split(s, DELIMETER)
 		fmt.Println(len(files))
@@ -68,15 +71,20 @@ func main() {
 func AssembleFiles(dir string) string {
 	files, _ := os.ReadDir(dir)
 	buffer := []string{}
+	first := true
 	for _, file := range files {
 		name := file.Name()
 		if strings.HasSuffix(name, ".go") == false {
 			continue
 		}
+		if first == false {
+			buffer = append(buffer, DELIMETER+"\n")
+		}
 		topLine := file.Name() + "\n"
 		buffer = append(buffer, topLine)
 		goFile, _ := os.ReadFile(dir + "/" + name)
-		buffer = append(buffer, string(goFile))
+		buffer = append(buffer, string(goFile)+"\n")
+		first = false
 	}
-	return strings.Join(buffer, DELIMETER+"\n")
+	return strings.Join(buffer, "")
 }
