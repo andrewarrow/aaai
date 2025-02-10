@@ -41,16 +41,24 @@ func main() {
 			continue
 		}
 
+		fmt.Println("")
+
 		files := strings.Split(s, "---------")
+		fmt.Println(len(files))
 		for _, f := range files {
+			//fmt.Printf("%d: %v\n", i, []byte(f))
 			lines := strings.Split(f, "\n")
-			newFile := dir + "/" + lines[0]
+			j := 0
+			if strings.TrimSpace(lines[0]) == "" {
+				j++
+			}
+			newFile := dir + "/" + lines[j]
 			content := strings.Join(lines[1:], "\n")
+			fmt.Println(newFile, len(content))
 
 			os.Remove(newFile)
 			os.WriteFile(newFile, []byte(content), 0644)
 		}
-		fmt.Println("")
 
 	}
 }

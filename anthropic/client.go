@@ -75,7 +75,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 						Type: "text",
 						Text: `I'm going to give you one or more .go source files each with a filename and some instructions. I want you to fix these files and return them with
 						---------
-						as the deliminator between files. Make the filename the first line of the file.  If there are no changes needed to a file, don't return it in the list.  I will use the same deliminator and filename system in the files I provide.  Include nothing else in your reply other than each filename, the contents of the file and the deliminator. Here are your instructions and the files:
+						as the deliminator between files. Make the filename the first line of the file.  If there are no changes needed to a file, don't return it in the list. I will use the same deliminator and filename system in the files I provide.  INCLUDE NOTHING ELSE IN YOUR REPLY OTHER THAN EACH FILENAME, THE CONTENTS OF THE FILE AND THE DELIMINATOR. Do not include ticks or extra english. Here are your instructions and the files:
 						 ` + prompt + ": " + document,
 					},
 				},
