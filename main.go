@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const DELIMETER = "---------"
+
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("./aaai [dir]")
@@ -23,10 +25,9 @@ func main() {
 
 	client := anthropic.NewClient(apiKey)
 	scanner := bufio.NewScanner(os.Stdin)
-	file := dir + "/main.go"
 
 	for {
-		goFile, _ := os.ReadFile(file)
+		oneOrMoreFiles := AssembleFiles(dir)
 		fmt.Print("> ")
 		scanner.Scan()
 		input := strings.TrimSpace(scanner.Text())
@@ -35,7 +36,8 @@ func main() {
 			break
 		}
 
-		s, err := client.Complete(input, "main.go\n"+string(goFile))
+		fmt.Println(oneOrMoreFiles)
+		s, err := client.Complete(input, oneOrMoreFiles)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
@@ -43,7 +45,7 @@ func main() {
 
 		fmt.Println("")
 
-		files := strings.Split(s, "---------")
+		files := strings.Split(s, DELIMETER)
 		fmt.Println(len(files))
 		for _, f := range files {
 			//fmt.Printf("%d: %v\n", i, []byte(f))
@@ -53,7 +55,7 @@ func main() {
 				j++
 			}
 			newFile := dir + "/" + lines[j]
-			content := strings.Join(lines[1:], "\n")
+			content := strings.Join(lines[j+1:], "\n")
 			fmt.Println(newFile, len(content))
 
 			os.Remove(newFile)
@@ -61,4 +63,16 @@ func main() {
 		}
 
 	}
+}
+
+func AssembleFiles(dir string) string {
+	files, _ := os.ReadDir(dir)
+	buffer := []string{}
+	for _, file := range files {
+		topLine := file.Name() + "\n"
+		buffer = append(buffer, topLine)
+		goFile, _ := os.ReadFile(dir + "/" + file.Name())
+		buffer = append(buffer, string(goFile))
+	}
+	return strings.Join(buffer, DELIMETER+"\n")
 }
