@@ -69,9 +69,13 @@ func AssembleFiles(dir string) string {
 	files, _ := os.ReadDir(dir)
 	buffer := []string{}
 	for _, file := range files {
+		name := file.Name()
+		if strings.HasSuffix(name, ".go") == false {
+			continue
+		}
 		topLine := file.Name() + "\n"
 		buffer = append(buffer, topLine)
-		goFile, _ := os.ReadFile(dir + "/" + file.Name())
+		goFile, _ := os.ReadFile(dir + "/" + name)
 		buffer = append(buffer, string(goFile))
 	}
 	return strings.Join(buffer, DELIMETER+"\n")
