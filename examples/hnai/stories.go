@@ -43,5 +43,5 @@ func fetchStoriesSync() ([]Story, error) {
 		stories[i] = story
 	}
 
-	return stories, nil
+	return stories[0:20], nil
 }

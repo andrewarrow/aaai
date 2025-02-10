@@ -1,36 +1,30 @@
 package main
 
 import (
-	"math/rand"
+	"net/http"
 	"strings"
+
+	"golang.org/x/net/html"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
-	strings []string
+	stories []Story
 	cursor  int
 	width   int
 	height  int
-}
-
-func generateRandomString(length int) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
-	}
-	return string(b)
+	content string
 }
 
 func initialModel() model {
-	strings := make([]string, 20)
-	for i := range strings {
-		strings[i] = generateRandomString(10)
+	stories, err := fetchStoriesSync()
+	if err != nil {
+		stories = []Story{}
 	}
 	return model{
-		strings: strings,
+		stories: stories,
 		cursor:  0,
 	}
 }
@@ -50,8 +44,22 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.cursor--
 			}
 		case "down":
-			if m.cursor < len(m.strings)-1 {
+			if m.cursor < len(m.stories)-1 {
 				m.cursor++
+			}
+		case "enter":
+			if len(m.stories) > 0 {
+				story := m.stories[m.cursor]
+				if story.URL != "" {
+					resp, err := http.Get(story.URL)
+					if err == nil {
+						defer resp.Body.Close()
+						doc, err := html.Parse(resp.Body)
+						if err == nil {
+							m.content = extractText(doc)
+						}
+					}
+				}
 			}
 		}
 	case tea.WindowSizeMsg:
@@ -63,6 +71,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m model) View() string {
 	s := strings.Builder{}
+
+	if m.content != "" {
+		contentStyle := lipgloss.NewStyle().
+			Width((m.width*80)/100 - 4).
+			Height((m.height*80)/100 - 2)
+		return contentStyle.Render(m.content)
+	}
 
 	tableStyle := lipgloss.NewStyle().
 		Border(lipgloss.NormalBorder()).
@@ -76,14 +91,15 @@ func (m model) View() string {
 	selectedStyle := lipgloss.NewStyle().
 		Width((m.width*80)/100 - 6).
 		Height(1).
-		Background(lipgloss.Color("5"))
+		Background(lipgloss.Color("236")).
+		Foreground(lipgloss.Color("15"))
 
 	content := strings.Builder{}
-	for i, str := range m.strings {
+	for i, story := range m.stories {
 		if i == m.cursor {
-			content.WriteString(selectedStyle.Render(str))
+			content.WriteString(selectedStyle.Render(story.Title))
 		} else {
-			content.WriteString(style.Render(str))
+			content.WriteString(style.Render(story.Title))
 		}
 		content.WriteString("\n")
 	}
