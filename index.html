@@ -3,39 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Andrew Arrow</title>
+    <title>andrewarrow.dev</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #5850FF;
+            --text-color: #1A1A1A;
+            --gray-color: #666666;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.5;
+            color: var(--text-color);
             margin: 0;
-            padding: 20px;
+            padding: 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #EAEAEA;
+        }
+
+        .logo {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--gray-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .sign-in {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border: 1px solid #EAEAEA;
+            border-radius: 2rem;
+            text-decoration: none;
+            color: var(--text-color);
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
         }
+
+        .hero h2 {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--gray-color);
+            margin-bottom: 3rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 4rem;
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .button-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .button-secondary {
+            border: 1px solid #EAEAEA;
+            color: var(--text-color);
+        }
+
         .content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-header h3 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="content">
-        <h1>Welcome to My GitHub Page</h1>
-        <p>Hello! This is my personal GitHub Pages website. I'm currently working on building this site.</p>
-        
-        <h2>About Me</h2>
-        <p>I'm a developer interested in creating and sharing interesting projects.</p>
-        
-        <h2>Projects</h2>
-        <p>Check back soon to see my latest work!</p>
-    </div>
+    <nav>
+        <a href="/" class="logo">andrew arrow</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/">Option A</a>
+            <a href="/">Option B</a>
+            <a href="/">Option C</a>
+        </div>
+        <a href="/" class="sign-in">
+            Sign in
+        </a>
+    </nav>
+
+    <main>
+        <section class="hero">
+            <h1>andrew arrow</h1>
+            <h2>Software Conductor</h2>
+            <p>Former Software Engineer now Conducting a Symphony of AI Software Engineers</p>
+            <div class="button-group">
+                <a href="https://www.linkedin.com/in/andrewarrow/" class="button button-primary">Linkedin</a>
+                <a href="https://github.com/andrewarrow" class="button button-secondary">github</a>
+            </div>
+        </section>
+
+        <div class="content">
+            <div class="section-header">
+                <h3>ycombinator news</h3>
+                <a href="https://news.ycombinator.com/" class="view-all">View</a>
+            </div>
+
+            <div class="section-header">
+                <h3>repos</h3>
+                <a href="https://github.com/andrewarrow?tab=repositories" class="view-all">View</a>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
