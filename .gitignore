@@ -1,4 +1,5 @@
 go.sum
 examples/hnai/hnai
 .DS_Store
+tests/sample/sample
 aaai
