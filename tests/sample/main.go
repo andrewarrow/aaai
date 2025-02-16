@@ -6,8 +6,13 @@ import (
 	"sample/foo"
 )
 
+const (
+	mainMessage = "Starting sample application"
+)
+
+// main is the entry point of the application
 func main() {
-	fmt.Println("sample")
+	fmt.Println(mainMessage)
 	foo.Foo()
 	bar.Bar()
 }

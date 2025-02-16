@@ -3,8 +3,13 @@
 suggest some edits to each .go file and tell me 1. the filepath 2. the line numbers to either remove or add to, use git patch style 3. remember not to include anything in your reply other than git patch format
 
 ```
-git apply patch.diff
-suggest some edits to each .go file and reply with a git patch format like                                                                               diff --git a/tests/sample/bar/bar.go b/tests/sample/bar/bar.go
+suggest some edits to each .go file and reply with a git diff that I can apply with git apply.
+Make sure proper line endings and spacing. I want to avoid error: corrupt patch.
+Use explicit git diff headers and Unix line endings.
+Ensure no trailing spaces and proper line endings.
+
+diff --git a/tests/sample/bar/bar.go b/tests/sample/bar/bar.go
+
 index 3c16bca..3d08092 100644
 --- a/tests/sample/bar/bar.go
 +++ b/tests/sample/bar/bar.go

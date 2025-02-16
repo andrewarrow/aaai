@@ -48,22 +48,9 @@ func main() {
 
 		fmt.Println("\n================\n")
 
-		files := strings.Split(s, DELIMETER)
-		fmt.Println(len(files))
-		for _, f := range files {
-			//fmt.Printf("%d: %v\n", i, []byte(f))
-			lines := strings.Split(f, "\n")
-			j := 0
-			if strings.TrimSpace(lines[0]) == "" {
-				j++
-			}
-			newFile := dir + "/" + lines[j]
-			content := strings.Join(lines[j+1:], "\n")
-			fmt.Println(newFile, len(content))
-
-			os.Remove(newFile)
-			os.WriteFile(newFile, []byte(content), 0644)
-		}
+		newFile := "diff.patch"
+		os.Remove(newFile)
+		os.WriteFile(newFile, []byte(s), 0644)
 
 	}
 }

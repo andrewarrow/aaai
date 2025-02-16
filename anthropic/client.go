@@ -73,10 +73,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 				Content: []Content{
 					{
 						Type: "text",
-						Text: `I'm going to give you one or more .go source files each with a filename and some instructions. I want you to fix these files and return them with
-						---------
-						as the deliminator between files. Make the filename the first line of the file.  If there are no changes needed to a file, don't return it in the list. I will use the same deliminator and filename system in the files I provide.  INCLUDE NOTHING ELSE IN YOUR REPLY OTHER THAN EACH FILENAME, THE CONTENTS OF THE FILE AND THE DELIMINATOR. Do not include ticks or extra english. Here are your instructions and the files:
-						 ` + prompt + ": " + document,
+						Text: `I'm going to give you one or more .go source files each with a filepath and some instructions. I want you to fix these files and return a git patch file. Return only a valid git patch file that I can run git apply on. Do not include any english before the patch file or after and no tick marks. Your output should be able to be saved as a file as the patch. I want to avoid error: corrupt patch. Use explicit git diff headers and Unix line endings. The header lines are incomplete. A proper git diff header should have both --- and +++ lines with complete file paths and timestamps. The line numbers in the @@ header must match the content. Do not mix tabs and spaces. Intent with tabs only. Ensure no trailing spaces.` + prompt + ": " + document,
 					},
 				},
 			},
