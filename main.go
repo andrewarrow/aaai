@@ -30,6 +30,9 @@ func main() {
 	m := prompt.ParseDiffs(s)
 	for k, v := range m {
 		fmt.Println(k)
+		//prompt.HandleDiffs(dir+"/"+k, v)
+		fmt.Println(v)
+		fmt.Println("")
 	}
 }
 func maini2() {

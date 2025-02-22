@@ -82,8 +82,8 @@ func convertUnifiedDiffToDiffs(originalText, unifiedDiff string, dmp *diffmatchp
 	return diffs
 }
 
-func ParseDiffs(response string) map[string][]string {
-	diffs := make(map[string][]string)
+func ParseDiffs(response string) map[string]string {
+	diffs := make(map[string]string)
 
 	sections := strings.Split(response, "```diff")
 
@@ -92,20 +92,25 @@ func ParseDiffs(response string) map[string][]string {
 		if len(parts) < 1 {
 			continue
 		}
-		diffContent := parts[0]
+		diffContent := strings.TrimSpace(parts[0])
 
+		newLines := []string{}
 		lines := strings.Split(diffContent, "\n")
 		var filename string
 		for _, line := range lines {
 			if strings.HasPrefix(line, "+++ ") {
 				filename = strings.TrimPrefix(line, "+++ ")
 				filename = strings.TrimSpace(filename)
-				break
+				continue
 			}
+			if strings.HasPrefix(line, "--- ") {
+				continue
+			}
+			newLines = append(newLines, line)
 		}
 
 		if filename != "" {
-			diffs[filename] = lines
+			diffs[filename] = strings.Join(newLines, "\n")
 		}
 	}
 
