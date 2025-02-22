@@ -2,6 +2,7 @@ package main
 
 import (
 	"aaai/anthropic"
+	"aaai/diff"
 	"aaai/prompt"
 	"fmt"
 	"os"
@@ -47,22 +48,8 @@ func main() {
 			break
 		}
 
-		//file, _ := os.OpenFile(".aaai.input.history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		//file.Write([]byte(input + "\n"))
 		p := prompt.MakePrompt(input, fcs)
-		fmt.Println(p)
 		s, _ := client.Complete(p)
-		fmt.Println(s)
-		/*
-			m := prompt.ParseDiffs(s)
-			for k, v := range m {
-				fmt.Println(k)
-				fmt.Println("====")
-				fmt.Println(v)
-				fmt.Println("====!")
-				//err := diff.HandleDiffs(dir+"/"+k, v)
-				//fmt.Println(err)
-				//fmt.Println("")
-			}*/
+		diff.ProcesssDiffs(dir, s)
 	}
 }
