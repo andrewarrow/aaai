@@ -2,6 +2,7 @@ package main
 
 import (
 	"aaai/anthropic"
+	"aaai/diff"
 	"aaai/prompt"
 	"bufio"
 	"fmt"
@@ -30,7 +31,7 @@ func main() {
 	m := prompt.ParseDiffs(s)
 	for k, v := range m {
 		fmt.Println(k)
-		//prompt.HandleDiffs(dir+"/"+k, v)
+		diff.HandleDiffs(dir+"/"+k, v)
 		fmt.Println(v)
 		fmt.Println("")
 	}
