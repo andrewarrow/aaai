@@ -43,8 +43,7 @@ func main() {
 		}
 
 		input := strings.TrimSpace(line)
-
-		if input == "quit" {
+		if input == "quit" || input == "exit" {
 			break
 		}
 
