@@ -16,6 +16,7 @@ func main() {
 		return
 	}
 	dir := os.Args[1]
+	_ = dir
 
 	apiKey := os.Getenv("ANTHROPIC_API_KEY")
 	if apiKey == "" {
@@ -24,7 +25,9 @@ func main() {
 	}
 
 	p := prompt.MakePrompt()
-	fmt.Println(dir, p)
+	client := anthropic.NewClient(apiKey)
+	s, err := client.Complete(p)
+	fmt.Println(s, err)
 }
 func maini2() {
 	if len(os.Args) < 2 {
@@ -56,7 +59,7 @@ func maini2() {
 		file.Write([]byte(input + "\n"))
 
 		fmt.Println(oneOrMoreFiles)
-		s, err := client.Complete(input, oneOrMoreFiles)
+		s, err := client.Complete2(input, oneOrMoreFiles)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			continue
