@@ -4,11 +4,8 @@ import (
 	"aaai/anthropic"
 	"aaai/diff"
 	"aaai/prompt"
-	"bufio"
 	"fmt"
 	"os"
-	"os/exec"
-	"strings"
 )
 
 func main() {
@@ -25,19 +22,26 @@ func main() {
 		return
 	}
 
-	p := prompt.MakePrompt()
-	client := anthropic.NewClient(apiKey)
-	s, _ := client.Complete(p)
-	m := prompt.ParseDiffs(s)
-	for k, v := range m {
-		fmt.Println(k)
-		fmt.Println(v)
-		fmt.Println("")
-		err := diff.HandleDiffs(dir+"/"+k, v)
-		fmt.Println(err)
-		fmt.Println("")
+	fcs := prompt.AssembleFiles(dir)
+	fmt.Println(fcs)
+
+	if false {
+		p := prompt.MakePrompt()
+		client := anthropic.NewClient(apiKey)
+		s, _ := client.Complete(p)
+		m := prompt.ParseDiffs(s)
+		for k, v := range m {
+			fmt.Println(k)
+			fmt.Println(v)
+			fmt.Println("")
+			err := diff.HandleDiffs(dir+"/"+k, v)
+			fmt.Println(err)
+			fmt.Println("")
+		}
 	}
 }
+
+/*
 func maini2() {
 	if len(os.Args) < 2 {
 		fmt.Println("./aaai [dir]")
@@ -82,36 +86,4 @@ func maini2() {
 		ApplyPatch(dir)
 
 	}
-}
-
-func ApplyPatch(dir string) {
-	cmd := exec.Command("git", "apply", "--whitespace=fix", "diff.patch")
-	cmd.Dir = dir
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		fmt.Printf("%v\n", err)
-	}
-
-	fmt.Printf("%s\n", output)
-}
-
-func AssembleFiles(dir string) string {
-	files, _ := os.ReadDir(dir)
-	buffer := []string{}
-	first := true
-	for _, file := range files {
-		name := file.Name()
-		if strings.HasSuffix(name, ".go") == false {
-			continue
-		}
-		if first == false {
-			buffer = append(buffer, "\n")
-		}
-		topLine := file.Name() + "\n"
-		buffer = append(buffer, topLine)
-		goFile, _ := os.ReadFile(dir + "/" + name)
-		buffer = append(buffer, string(goFile)+"\n")
-		first = false
-	}
-	return strings.Join(buffer, "")
-}
+} */
