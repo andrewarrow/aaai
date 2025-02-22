@@ -24,7 +24,7 @@ func main() {
 
 	fcs := prompt.AssembleFiles(dir)
 
-	p := prompt.MakePrompt(fcs)
+	p := prompt.MakePrompt("Add email field to User and update all related code", fcs)
 	client := anthropic.NewClient(apiKey)
 	s, _ := client.Complete(p)
 	m := prompt.ParseDiffs(s)

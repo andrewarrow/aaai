@@ -8,13 +8,30 @@ import (
 	"strings"
 )
 
-func NewPromptManager() *PromptManager {
+func NewPromptManager(request string) *PromptManager {
 	return &PromptManager{
 		SystemPrompt: `You are a skilled programmer helping edit code, using unified diffs.
 Follow the indentation and style of the existing code.
 Keep line length to 80 characters or less unless other conventions override.
 Update all imports needed by your changes.
-Use unified diff format with 3 lines of context.`,
+Don't make lines diffs that are exactly the same as the original lines expect for whitespace. For example
+
+-import "fmt"
+-
+-func SaveUser(user User) {
+-       fmt.Printf("Saving: %s\n", user.Name)
+-}
++ import "fmt"
++
++ func SaveUser(user User) {
++       fmt.Printf("Saving user %s (%s)\n", user.Name, user.Email)
++ }
+
+is wrong, it should be just a 1 line diff of
+
++       fmt.Printf("Saving user %s (%s)\n", user.Name, user.Email)
+
+Use unified diff format with 3 lines of context. ` + request,
 		CodeFence: "```",
 	}
 }
@@ -92,8 +109,8 @@ func (pm *PromptManager) ParseDiffs(response string) map[string][]string {
 	return diffs
 }
 
-func MakePrompt(files []FileContent) string {
-	pm := NewPromptManager()
+func MakePrompt(request string, files []FileContent) string {
+	pm := NewPromptManager(request)
 
 	pm.Files = files
 
