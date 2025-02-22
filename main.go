@@ -26,8 +26,11 @@ func main() {
 
 	p := prompt.MakePrompt()
 	client := anthropic.NewClient(apiKey)
-	s, err := client.Complete(p)
-	fmt.Println(s, err)
+	s, _ := client.Complete(p)
+	m := prompt.ParseDiffs(s)
+	for k, v := range m {
+		fmt.Println(k)
+	}
 }
 func maini2() {
 	if len(os.Args) < 2 {

@@ -98,13 +98,18 @@ func MakePrompt() string {
 	files := []FileContent{
 		{
 			Filename: "models.go",
-			Content: `type User struct {
+			Content: `package main
+type User struct {
     Name string
 }`,
 		},
 		{
 			Filename: "database.go",
-			Content: `func SaveUser(user User) {
+			Content: `package main
+
+import "fmt"
+
+func SaveUser(user User) {
     fmt.Printf("Saving: %s\n", user.Name)
 }`,
 		},

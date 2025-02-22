@@ -8,41 +8,31 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-func HandleDiffs() {
+func HandleDiffs(filePath, diffContent string) {
 
-	filePath := os.Args[1]
-	diffContent := os.Args[2]
-
-	// Read original file
 	originalContent, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Error reading file: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Create diff-match-patch instance
 	dmp := diffmatchpatch.New()
 
-	// Convert unified diff to diffs
-	// First, we need to extract the actual changes from the unified diff
 	diffs := convertUnifiedDiffToDiffs(string(originalContent), diffContent, dmp)
 	if len(diffs) == 0 {
 		fmt.Println("No valid diff found")
 		os.Exit(1)
 	}
 
-	// Create and apply patches
 	patches := dmp.PatchMake(string(originalContent), diffs)
 	newContent, applied := dmp.PatchApply(patches, string(originalContent))
 
-	// Verify all patches were applied
 	for i, wasApplied := range applied {
 		if !wasApplied {
 			fmt.Printf("Warning: Patch %d could not be applied\n", i+1)
 		}
 	}
 
-	// Write the new content back to file
 	err = os.WriteFile(filePath, []byte(newContent), 0644)
 	if err != nil {
 		fmt.Printf("Error writing file: %v\n", err)
@@ -86,6 +76,36 @@ func convertUnifiedDiffToDiffs(originalText, unifiedDiff string, dmp *diffmatchp
 		default:
 			// Headers or other lines - skip
 			continue
+		}
+	}
+
+	return diffs
+}
+
+func ParseDiffs(response string) map[string][]string {
+	diffs := make(map[string][]string)
+
+	sections := strings.Split(response, "```diff")
+
+	for _, section := range sections[1:] { // Skip first section (pre-diff text)
+		parts := strings.SplitN(section, "```", 2)
+		if len(parts) < 1 {
+			continue
+		}
+		diffContent := parts[0]
+
+		lines := strings.Split(diffContent, "\n")
+		var filename string
+		for _, line := range lines {
+			if strings.HasPrefix(line, "+++ ") {
+				filename = strings.TrimPrefix(line, "+++ ")
+				filename = strings.TrimSpace(filename)
+				break
+			}
+		}
+
+		if filename != "" {
+			diffs[filename] = lines
 		}
 	}
 
