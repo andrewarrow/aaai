@@ -14,23 +14,6 @@ func NewPromptManager(request string) *PromptManager {
 Follow the indentation and style of the existing code.
 Keep line length to 80 characters or less unless other conventions override.
 Update all imports needed by your changes.
-Don't make lines diffs that are exactly the same as the original lines expect for whitespace. For example
-
--import "fmt"
--
--func SaveUser(user User) {
--       fmt.Printf("Saving: %s\n", user.Name)
--}
-+ import "fmt"
-+
-+ func SaveUser(user User) {
-+       fmt.Printf("Saving user %s (%s)\n", user.Name, user.Email)
-+ }
-
-is wrong, it should be just a 1 line diff of
-
-+       fmt.Printf("Saving user %s (%s)\n", user.Name, user.Email)
-
 Use unified diff format with 3 lines of context. ` + request,
 		CodeFence: "```",
 	}
