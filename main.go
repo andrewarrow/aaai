@@ -23,10 +23,9 @@ func main() {
 	}
 
 	fcs := prompt.AssembleFiles(dir)
-	fmt.Println(fcs)
 
 	if false {
-		p := prompt.MakePrompt()
+		p := prompt.MakePrompt(fcs)
 		client := anthropic.NewClient(apiKey)
 		s, _ := client.Complete(p)
 		m := prompt.ParseDiffs(s)

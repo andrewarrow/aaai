@@ -92,39 +92,9 @@ func (pm *PromptManager) ParseDiffs(response string) map[string][]string {
 	return diffs
 }
 
-func MakePrompt() string {
+func MakePrompt(files []FileContent) string {
 	pm := NewPromptManager()
 
-	files := []FileContent{
-		{
-			Filename: "models.go",
-			Content: `package main
-type User struct {
-    Name string
-}`,
-		},
-		{
-			Filename: "database.go",
-			Content: `package main
-
-import "fmt"
-
-func SaveUser(user User) {
-    fmt.Printf("Saving: %s\n", user.Name)
-}`,
-		},
-		{
-			Filename: "main.go",
-			Content: `package main
-
-import "fmt"
-
-func main() {
-    user := User{Name: "Alice"}
-    SaveUser(user)
-}`,
-		},
-	}
 	pm.Files = files
 
 	prompt := pm.BuildPrompt("Add email field to User and update all related code")
