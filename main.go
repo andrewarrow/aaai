@@ -4,10 +4,11 @@ import (
 	"aaai/anthropic"
 	"aaai/diff"
 	"aaai/prompt"
-	"bufio"
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/chzyer/readline"
 )
 
 func main() {
@@ -24,20 +25,31 @@ func main() {
 	}
 
 	client := anthropic.NewClient(apiKey)
-	scanner := bufio.NewScanner(os.Stdin)
+
+	rl, _ := readline.NewEx(&readline.Config{
+		Prompt:          "> ",
+		HistoryFile:     ".aaai.input.history",
+		InterruptPrompt: "^C",
+		EOFPrompt:       "quit",
+	})
 
 	for {
 		fcs := prompt.AssembleFiles(dir)
 		fmt.Print("> ")
-		scanner.Scan()
-		input := strings.TrimSpace(scanner.Text())
+
+		line, err := rl.Readline()
+		if err != nil { // io.EOF, readline.ErrInterrupt
+			break
+		}
+
+		input := strings.TrimSpace(line)
 
 		if input == "quit" {
 			break
 		}
 
-		file, _ := os.OpenFile(".aaai.input.history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		file.Write([]byte(input + "\n"))
+		//file, _ := os.OpenFile(".aaai.input.history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		//file.Write([]byte(input + "\n"))
 		p := prompt.MakePrompt(input, fcs)
 		s, _ := client.Complete(p)
 		m := prompt.ParseDiffs(s)
