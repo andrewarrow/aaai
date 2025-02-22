@@ -1,73 +1,71 @@
 package diff
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 )
 
-func HandleDiffs(filename string, diffLines []string) error {
-	// Read the original file
-	originalContent, err := os.ReadFile(filename)
+func ProcesssDiffs(dir, jsonData string) {
+	// Parse the JSON
+	var changes []Change
+	err := json.Unmarshal([]byte(jsonData), &changes)
 	if err != nil {
-		return fmt.Errorf("error reading file %s: %v", filename, err)
+		fmt.Printf("Error parsing JSON: %v\n", err)
+		return
 	}
 
-	// Split content into lines, preserving empty lines
-	lines := strings.Split(string(originalContent), "\n")
-
-	// Parse the diff header to get line numbers
-	// Format: @@ -3,6 +3,9 @@ means:
-	// - starts at line 3, removes 6 lines
-	// + starts at line 3, adds 9 lines
-	header := diffLines[0]
-	var oldStart, oldCount, newStart, newCount int
-	fmt.Sscanf(header, "@@ -%d,%d +%d,%d @@", &oldStart, &oldCount, &newStart, &newCount)
-
-	// Convert to 0-based index
-	startLine := oldStart - 1
-
-	// Create new content
-	newLines := make([]string, 0)
-
-	// Add all lines before the change
-	newLines = append(newLines, lines[:startLine]...)
-
-	// Track position in original file
-	currentLine := startLine
-
-	// Apply the changes
-	for i := 1; i < len(diffLines); i++ {
-		line := diffLines[i]
-
-		switch {
-		case strings.HasPrefix(line, "-"):
-			// Skip the line in original content
-			currentLine++
-
-		case strings.HasPrefix(line, "+"):
-			// Add new line (without the + prefix)
-			newLines = append(newLines, line[1:])
-
-		case line == "\\ No newline at end of file":
-			// Ignore this line
+	// Process each change
+	for _, change := range changes {
+		// Read the original file
+		content, err := os.ReadFile(dir + "/" + change.File)
+		if err != nil {
+			fmt.Printf("Error reading file %s: %v\n", change.File, err)
 			continue
+		}
 
-		default:
-			// Context line - copy from original and advance
-			if currentLine < len(lines) {
-				newLines = append(newLines, line)
+		lines := strings.Split(string(content), "\n")
+
+		// Apply each range change
+		for _, r := range change.Ranges {
+			// Verify the "before" content matches
+			actualBefore := lines[r.Start : r.End+1]
+			if !compareLines(actualBefore, r.Before) {
+				fmt.Printf("Warning: Content mismatch in file %s at lines %d-%d\n",
+					change.File, r.Start+1, r.End+1)
+				continue
 			}
-			currentLine++
+
+			// Create new content
+			newLines := make([]string, 0, len(lines)+(len(r.After)-len(r.Before)))
+			newLines = append(newLines, lines[:r.Start]...)
+			newLines = append(newLines, r.After...)
+			newLines = append(newLines, lines[r.End+1:]...)
+			lines = newLines
+		}
+
+		// Write the modified content back to the file
+		newContent := strings.Join(lines, "\n")
+		err = os.WriteFile(dir+"/"+change.File, []byte(newContent), 0644)
+		if err != nil {
+			fmt.Printf("Error writing file %s: %v\n", change.File, err)
+			continue
+		}
+
+		fmt.Printf("Successfully updated file: %s\n", change.File)
+	}
+}
+
+// compareLines compares two string slices for equality, ignoring trailing whitespace
+func compareLines(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if strings.TrimRight(a[i], " \t\r\n") != strings.TrimRight(b[i], " \t\r\n") {
+			return false
 		}
 	}
-
-	// Add remaining lines from the original file
-	if currentLine < len(lines) {
-		newLines = append(newLines, lines[currentLine:]...)
-	}
-
-	// Write back to file
-	newContent := strings.Join(newLines, "\n")
-	return os.WriteFile(filename, []byte(newContent), 0644)
+	return true
 }
