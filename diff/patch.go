@@ -7,55 +7,64 @@ import (
 )
 
 func HandleDiffs(filename string, diffLines []string) error {
+	// Read the original file
 	originalContent, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("error reading file %s: %v", filename, err)
 	}
 
-	// Split content into lines
+	// Split content into lines, preserving empty lines
 	lines := strings.Split(string(originalContent), "\n")
 
 	// Parse the diff header to get line numbers
+	// Format: @@ -3,6 +3,9 @@ means:
+	// - starts at line 3, removes 6 lines
+	// + starts at line 3, adds 9 lines
 	header := diffLines[0]
-	var startLine, removedLines, addedLines int
-	fmt.Sscanf(header, "@@ -%d,%d +%d,%d @@", &startLine, &removedLines, &startLine, &addedLines)
-	startLine-- // Convert to 0-based index
+	var oldStart, oldCount, newStart, newCount int
+	fmt.Sscanf(header, "@@ -%d,%d +%d,%d @@", &oldStart, &oldCount, &newStart, &newCount)
+
+	// Convert to 0-based index
+	startLine := oldStart - 1
 
 	// Create new content
-	newLines := make([]string, 0, len(lines)+addedLines-removedLines)
+	newLines := make([]string, 0)
+
+	// Add all lines before the change
 	newLines = append(newLines, lines[:startLine]...)
 
-	// Apply the changes
-	diffIndex := 1
-	for diffIndex < len(diffLines) {
-		line := diffLines[diffIndex]
+	// Track position in original file
+	currentLine := startLine
 
-		// Check if we've gone past the end of the original file
-		if startLine >= len(lines) {
-			return fmt.Errorf("patch extends beyond end of file at line %d", startLine+1)
-		}
+	// Apply the changes
+	for i := 1; i < len(diffLines); i++ {
+		line := diffLines[i]
 
 		switch {
 		case strings.HasPrefix(line, "-"):
-			// Skip removed line in original content
-			startLine++
+			// Skip the line in original content
+			currentLine++
+
 		case strings.HasPrefix(line, "+"):
-			// Add new line
+			// Add new line (without the + prefix)
 			newLines = append(newLines, line[1:])
+
+		case line == "\\ No newline at end of file":
+			// Ignore this line
+			continue
+
 		default:
-			// Make sure we're not past the end of the file
-			if startLine < len(lines) {
-				// Copy unchanged line
-				newLines = append(newLines, lines[startLine])
+			// Context line - copy from original and advance
+			if currentLine < len(lines) {
+				newLines = append(newLines, line)
 			}
-			startLine++
+			currentLine++
 		}
-		diffIndex++
 	}
 
-	// Add remaining lines
-	if startLine < len(lines) {
-		newLines = append(newLines, lines[startLine:]...)
+	// Add remaining lines from the original file
+	if currentLine < len(lines) {
+		newLines = append(newLines, lines[currentLine:]...)
 	}
 
 	// Write back to file
