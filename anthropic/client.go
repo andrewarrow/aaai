@@ -73,7 +73,7 @@ func (c *Client) Complete(prompt, document string) (string, error) {
 				Content: []Content{
 					{
 						Type: "text",
-						Text: `I'm going to give you one or more .go source files each with a filepath and some instructions. I want you to fix these files and return a git patch file. Return only a valid git patch file that I can run git apply on. Do not include any english before the patch file or after and no tick marks. Your output should be able to be saved as a file as the patch. I want to avoid error: corrupt patch. Use explicit git diff headers and Unix line endings. The header lines are incomplete. A proper git diff header should have both --- and +++ lines with complete file paths and timestamps. The line numbers in the @@ header must match the content. Do not mix tabs and spaces. Intent with tabs only. Ensure no trailing spaces.` + prompt + ": " + document,
+						Text: `I'm going to give you one or more .go source files each with a filepath and some instructions. I want you to fix these files and return a git diff file. Return only a valid git patch file that I can run git apply on. Do not include any english before the patch file or after and no tick marks. Your output should be able to be saved as a file as the patch.  Use explicit git diff headers and Unix line endings. A proper git diff header should have both --- and +++ lines with complete file paths and timestamps. The line numbers in the @@ header must match the content. Do not mix tabs and spaces. Intent with tabs only. Ensure no trailing spaces. Review your work before answering by running your final output through the question: is this a valid git diff file and if not, fix the problems.` + prompt + ": " + document,
 					},
 				},
 			},

@@ -2,15 +2,31 @@ package main
 
 import (
 	"aaai/anthropic"
+	"aaai/prompt"
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 )
 
-const DELIMETER = "---------"
-
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("./aaai [dir]")
+		return
+	}
+	dir := os.Args[1]
+
+	apiKey := os.Getenv("ANTHROPIC_API_KEY")
+	if apiKey == "" {
+		fmt.Println("Please set ANTHROPIC_API_KEY environment variable")
+		return
+	}
+
+	p := prompt.MakePrompt()
+	fmt.Println(dir, p)
+}
+func maini2() {
 	if len(os.Args) < 2 {
 		fmt.Println("./aaai [dir]")
 		return
@@ -48,11 +64,23 @@ func main() {
 
 		fmt.Println("\n================\n")
 
-		newFile := "diff.patch"
+		newFile := dir + "/diff.patch"
 		os.Remove(newFile)
-		os.WriteFile(newFile, []byte(s), 0644)
+		os.WriteFile(newFile, []byte(s+"\n"), 0644)
+		ApplyPatch(dir)
 
 	}
+}
+
+func ApplyPatch(dir string) {
+	cmd := exec.Command("git", "apply", "--whitespace=fix", "diff.patch")
+	cmd.Dir = dir
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Printf("%v\n", err)
+	}
+
+	fmt.Printf("%s\n", output)
 }
 
 func AssembleFiles(dir string) string {
@@ -65,7 +93,7 @@ func AssembleFiles(dir string) string {
 			continue
 		}
 		if first == false {
-			buffer = append(buffer, DELIMETER+"\n")
+			buffer = append(buffer, "\n")
 		}
 		topLine := file.Name() + "\n"
 		buffer = append(buffer, topLine)
