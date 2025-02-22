@@ -77,7 +77,7 @@ func (c *Client) Complete(prompt string) (string, error) {
 				Content: []Content{
 					{
 						Type: "text",
-						Text: ``,
+						Text: prompt,
 					},
 				},
 			},
@@ -129,8 +129,8 @@ func (c *Client) Complete(prompt string) (string, error) {
 		if string(data) == "[DONE]\n" {
 			break
 		}
-		//parser.ProcessLine(string(data))
-		fmt.Println(string(data))
+		parser.ProcessLine(string(data))
+		//fmt.Println(string(data))
 	}
 	return parser.Result(), nil
 }
