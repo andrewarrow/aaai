@@ -24,19 +24,17 @@ func main() {
 
 	fcs := prompt.AssembleFiles(dir)
 
-	if false {
-		p := prompt.MakePrompt(fcs)
-		client := anthropic.NewClient(apiKey)
-		s, _ := client.Complete(p)
-		m := prompt.ParseDiffs(s)
-		for k, v := range m {
-			fmt.Println(k)
-			fmt.Println(v)
-			fmt.Println("")
-			err := diff.HandleDiffs(dir+"/"+k, v)
-			fmt.Println(err)
-			fmt.Println("")
-		}
+	p := prompt.MakePrompt(fcs)
+	client := anthropic.NewClient(apiKey)
+	s, _ := client.Complete(p)
+	m := prompt.ParseDiffs(s)
+	for k, v := range m {
+		fmt.Println(k)
+		fmt.Println(v)
+		fmt.Println("")
+		err := diff.HandleDiffs(dir+"/"+k, v)
+		fmt.Println(err)
+		fmt.Println("")
 	}
 }
 
