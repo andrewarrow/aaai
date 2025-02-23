@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -26,5 +27,21 @@ func fetchStoriesSync() ([]Story, error) {
 		return nil, err
 	}
 
-	return stories[0:20], nil
+	stories := make([]Story, 9)
+	for i := 0; i < 9; i++ {
+		url := fmt.Sprintf("https://hacker-news.firebaseio.com/v0/item/%d.json", storyIDs[i])
+		resp, err := http.Get(url)
+		if err != nil {
+			return nil, err
+		}
+		defer resp.Body.Close()
+
+		var story Story
+		if err := json.NewDecoder(resp.Body).Decode(&story); err != nil {
+			return nil, err
+		}
+		stories[i] = story
+	}
+
+	return stories, nil
 }
