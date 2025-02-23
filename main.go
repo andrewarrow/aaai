@@ -2,6 +2,7 @@ package main
 
 import (
 	"aaai/anthropic"
+	"aaai/diff"
 	"aaai/prompt"
 	"fmt"
 	"os"
@@ -54,6 +55,9 @@ func main() {
 		fmt.Println("")
 		fmt.Println("")
 		fmt.Println(s)
-		//diff.ProcessDiffs(dir, s)
+		m := prompt.ParseDiffs(s)
+		for k, v := range m {
+			diff.ApplyPatch(dir+"/"+k, v)
+		}
 	}
 }

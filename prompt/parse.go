@@ -4,8 +4,8 @@ import (
 	"strings"
 )
 
-func ParseDiffs(response string) map[string][]string {
-	diffs := make(map[string][]string)
+func ParseDiffs(response string) map[string]string {
+	diffs := make(map[string]string)
 
 	sections := strings.Split(response, "```diff")
 
@@ -23,16 +23,12 @@ func ParseDiffs(response string) map[string][]string {
 			if strings.HasPrefix(line, "+++ ") {
 				filename = strings.TrimPrefix(line, "+++ ")
 				filename = strings.TrimSpace(filename)
-				continue
-			}
-			if strings.HasPrefix(line, "--- ") {
-				continue
 			}
 			newLines = append(newLines, line)
 		}
 
 		if filename != "" {
-			diffs[filename] = newLines
+			diffs[filename] = strings.Join(newLines, "\n")
 		}
 	}
 

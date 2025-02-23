@@ -11,7 +11,7 @@ import (
 	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
-func ApplyPath(fileOrig, fileDiff string) {
+func ApplyPatch(fileOrig, fileDiff string) {
 
 	linesOrig, err := readLines(fileOrig)
 	if err != nil {
@@ -19,7 +19,7 @@ func ApplyPath(fileOrig, fileDiff string) {
 		os.Exit(1)
 	}
 
-	linesDiff, err := readLines(fileDiff)
+	linesDiff, err := readLinesFromString(fileDiff)
 	if err != nil {
 		fmt.Printf("Error reading %s: %v\n", fileDiff, err)
 		os.Exit(1)
@@ -184,6 +184,15 @@ func assertNewlines(lines []string) error {
 		}
 	}
 	return nil
+}
+
+func readLinesFromString(content string) ([]string, error) {
+	var lines []string
+	scanner := bufio.NewScanner(strings.NewReader(content))
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text()+"\n")
+	}
+	return lines, scanner.Err()
 }
 
 func readLines(filename string) ([]string, error) {
