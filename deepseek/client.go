@@ -1,4 +1,4 @@
-package anthropic
+package deepseek
 
 import (
 	"aaai/prompt"
@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DefaultAPIEndpoint = "https://api.anthropic.com/v1/messages"
+	DefaultAPIEndpoint = "https://api.deepseek.com/v1/chat/completions"
 )
 
 type Client struct {
@@ -27,29 +27,17 @@ type CompletionRequest struct {
 }
 
 type Message struct {
-	Role    string    `json:"role"`
-	Content []Content `json:"content"`
-}
-
-type Content struct {
-	Type     string    `json:"type"`
-	Text     string    `json:"text,omitempty"`
-	Document *Document `json:"document,omitempty"`
-}
-
-type Document struct {
-	Source Source `json:"source"`
-}
-
-type Source struct {
-	Type      string `json:"type"`
-	MediaType string `json:"media_type"`
-	Data      string `json:"data"`
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 type CompletionResponse struct {
-	Content string         `json:"content"`
+	Choices []Choice       `json:"choices"`
 	Error   *ErrorResponse `json:"error,omitempty"`
+}
+
+type Choice struct {
+	Message Message `json:"message"`
 }
 
 type ErrorResponse struct {
@@ -66,17 +54,12 @@ func NewClient(apiKey string) *Client {
 
 func (c *Client) Complete(promptString string) (string, error) {
 	req := CompletionRequest{
-		Model:  "claude-3-5-sonnet-20241022",
+		Model:  "deepseek-3.5", // Replace with the appropriate model name for Deepseek
 		Stream: true,
 		Messages: []Message{
 			{
-				Role: "user",
-				Content: []Content{
-					{
-						Type: "text",
-						Text: promptString,
-					},
-				},
+				Role:    "user",
+				Content: promptString,
 			},
 		},
 		MaxTokens: 8192,
@@ -93,8 +76,7 @@ func (c *Client) Complete(promptString string) (string, error) {
 	}
 
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("X-Api-Key", c.APIKey)
-	request.Header.Set("anthropic-version", "2023-06-01")
+	request.Header.Set("Authorization", "Bearer "+c.APIKey)
 
 	response, err := c.HTTPClient.Do(request)
 	if err != nil {
@@ -127,7 +109,6 @@ func (c *Client) Complete(promptString string) (string, error) {
 			break
 		}
 		parser.ProcessLine(string(data))
-		//fmt.Println(string(data))
 	}
 	return parser.Result(), nil
 }

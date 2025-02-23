@@ -1,7 +1,7 @@
 package main
 
 import (
-	"aaai/anthropic"
+	"aaai/deepseek"
 	"aaai/diff"
 	"aaai/prompt"
 	"fmt"
@@ -23,8 +23,14 @@ func main() {
 		fmt.Println("Please set ANTHROPIC_API_KEY environment variable")
 		return
 	}
+	apiKey = os.Getenv("DEEPSEEK")
+	if apiKey == "" {
+		fmt.Println("Please set DEEPSEEK environment variable")
+		return
+	}
 
-	client := anthropic.NewClient(apiKey)
+	//client := anthropic.NewClient(apiKey)
+	client := deepseek.NewClient(apiKey)
 
 	rl, _ := readline.NewEx(&readline.Config{
 		Prompt:          "> ",
