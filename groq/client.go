@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	DefaultAPIEndpoint = "https://api.groq.com/v1/chat/completions"
+	DefaultAPIEndpoint = "https://api.groq.com/openai/v1/chat/completions"
 )
 
 type Client struct {
@@ -108,7 +108,8 @@ func (c *Client) Complete(promptString string) (string, error) {
 		if string(data) == "[DONE]\n" {
 			break
 		}
-		parser.ProcessLine(string(data))
+
+		parser.ProcessLine(firstChoice(data))
 	}
 	return parser.Result(), nil
 }
