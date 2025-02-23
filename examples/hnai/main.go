@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/go-rod/rod"
 )
@@ -81,12 +82,12 @@ func captureScreenshot(url string) []byte {
 	browser := rod.New().MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage(url).MustWaitStable()
-	page.MustWaitNavigation()
+	page := browser.MustPage(url)
+	page = page.Timeout(9 * time.Second)
 
-	err := page.WaitIdle(1000)
+	err := page.WaitStable(1000)
 	if err != nil {
-		fmt.Printf("Error waiting for page to stabilize: %v\n", err)
+		fmt.Printf("Timeout or error waiting for page to stabilize: %v\n", err)
 		return nil
 	}
 	screenshot, _ := page.Screenshot(false, nil)

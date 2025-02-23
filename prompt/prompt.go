@@ -15,6 +15,9 @@ Follow the indentation and style of the existing code.
 Keep line length to 80 characters or less unless other conventions override.
 Update all imports needed by your changes.
 List each file using the CodeFence and the string diff after the fence.
+Always include 100% of the diffs for a single file in just one file between CodeFences.
+For example do not list 2 ranges of diffs for foo.txt and then a CodeFence and then one
+more diff for foo.txt. Instead all 3 diffs should be together for foo.txt file.
 Make sure to list +++ and the filename and --- and the filename at start of each diff.
 Use unified diff format with 3 lines of context.` + request,
 		CodeFence: "```",

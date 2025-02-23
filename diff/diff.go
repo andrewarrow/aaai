@@ -95,13 +95,30 @@ func findHunkPosition(lines []string, hunk Hunk) int {
 		if strings.HasPrefix(trimmedLine, " ") || strings.HasPrefix(trimmedLine, "-") {
 			contextLines = append(contextLines, trimmedLine[1:])
 		}
-		if len(contextLines) >= 3 {
-			break // Use up to 3 context lines
-		}
 	}
 
 	if len(contextLines) == 0 {
 		return -1
+	}
+
+	// First, check the expected start line
+	i := hunk.StartLine
+	if i >= 0 && i <= len(lines)-len(contextLines) {
+		matches := 0
+		for j, ctx := range contextLines {
+			if i+j >= len(lines) {
+				break
+			}
+			fileLine := strings.TrimRight(lines[i+j], "\n")
+			if fileLine == ctx {
+				matches++
+			} else {
+				break
+			}
+		}
+		if matches == len(contextLines) {
+			return i
+		}
 	}
 
 	// Search around the hunk's expected start line (0-based)
@@ -171,13 +188,11 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		before := result[:pos]
 		after := result[end:]
 
-		// Prepare new lines from the hunk
+		// Prepare new lines from the hunk - KEY FIX HERE
 		var newLines []string
 		for _, line := range hunk.Lines {
 			trimmed := strings.TrimRight(line, "\n")
-			if strings.HasPrefix(trimmed, "+") {
-				newLines = append(newLines, trimmed[1:]+"\n")
-			} else if strings.HasPrefix(trimmed, " ") {
+			if strings.HasPrefix(trimmed, "+") || strings.HasPrefix(trimmed, " ") {
 				newLines = append(newLines, trimmed[1:]+"\n")
 			}
 		}
