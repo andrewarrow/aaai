@@ -16,7 +16,7 @@ type Story struct {
 }
 
 func fetchStoriesSync() ([]Story, error) {
-	resp, err := http.Get("https://hacker-news.firebaseio.com/v0/newstories.json")
+	resp, err := http.Get(`https://hacker-news.firebaseio.com/v0/newstories.json?limitToFirst=9&orderBy="$key"`)
 	if err != nil {
 		return nil, err
 	}

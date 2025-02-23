@@ -56,6 +56,9 @@ func main() {
 		fmt.Println("")
 		fmt.Println(s)
 		m := prompt.ParseDiffs(s)
+		fmt.Println("===")
+		fmt.Println(m)
+		fmt.Println("===")
 		for k, v := range m {
 			diff.ApplyPatch(dir+"/"+k, v)
 		}
