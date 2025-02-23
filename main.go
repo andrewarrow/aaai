@@ -49,6 +49,6 @@ func main() {
 
 		p := prompt.MakePrompt(input, fcs)
 		s, _ := client.Complete(p)
-		diff.ProcesssDiffs(dir, s)
+		diff.ProcessDiffs(dir, s)
 	}
 }

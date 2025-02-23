@@ -1,13 +1,15 @@
 package diff
 
+// Change represents a modification to a file
 type Change struct {
-	File   string  `json:"file"`
-	Ranges []Range `json:"ranges"`
+	File   string
+	Ranges []Range
 }
 
+// Range represents a specific change within a file
 type Range struct {
-	Start  int      `json:"s"`
-	End    int      `json:"e"`
-	Before []string `json:"b"`
-	After  []string `json:"a"`
+	Start  int      // Start line number (0-based)
+	End    int      // End line number (0-based)
+	Before []string // Lines before the change
+	After  []string // Lines after the change
 }
