@@ -1,8 +1,8 @@
 package main
 
 import (
-	"aaai/deepseek"
 	"aaai/diff"
+	"aaai/groq"
 	"aaai/prompt"
 	"fmt"
 	"os"
@@ -28,9 +28,15 @@ func main() {
 		fmt.Println("Please set DEEPSEEK environment variable")
 		return
 	}
+	apiKey = os.Getenv("GROQ")
+	if apiKey == "" {
+		fmt.Println("Please set GROQ environment variable")
+		return
+	}
 
 	//client := anthropic.NewClient(apiKey)
-	client := deepseek.NewClient(apiKey)
+	//client := deepseek.NewClient(apiKey)
+	client := groq.NewClient(apiKey)
 
 	rl, _ := readline.NewEx(&readline.Config{
 		Prompt:          "> ",
@@ -55,8 +61,8 @@ func main() {
 		}
 
 		p := prompt.MakePrompt(input, fcs)
-		s, _ := client.Complete(p)
-		fmt.Println("")
+		s, err := client.Complete(p)
+		fmt.Println(err)
 		fmt.Println("")
 		fmt.Println("")
 		fmt.Println("")
