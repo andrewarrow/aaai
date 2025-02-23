@@ -12,7 +12,6 @@ import (
 )
 
 func ApplyPatch(fileOrig, fileDiff string) {
-
 	linesOrig, err := readLines(fileOrig)
 	if err != nil {
 		fmt.Printf("Error reading %s: %v\n", fileOrig, err)
@@ -63,11 +62,13 @@ func parseHunks(diffLines []string) []Hunk {
 				hunks = append(hunks, *currentHunk)
 			}
 			start, _ := strconv.Atoi(match[1])
+			start-- // Convert to 0-based
 			length, _ := strconv.Atoi(match[2])
 			newStart, _ := strconv.Atoi(match[3])
+			newStart-- // Convert to 0-based (though not used in applying patches)
 			newLength, _ := strconv.Atoi(match[4])
 			currentHunk = &Hunk{
-				StartLine: start,
+				StartLine: start, // Now 0-based
 				Length:    length,
 				NewStart:  newStart,
 				NewLength: newLength,
@@ -88,21 +89,50 @@ func parseHunks(diffLines []string) []Hunk {
 }
 
 func findHunkPosition(lines []string, hunk Hunk) int {
-	// Get context lines from the hunk (leading lines that start with space or minus)
 	var contextLines []string
 	for _, line := range hunk.Lines {
 		trimmedLine := strings.TrimRight(line, "\n")
-		if strings.HasPrefix(trimmedLine, " ") {
-			contextLines = append(contextLines, trimmedLine[1:])
-		} else if strings.HasPrefix(trimmedLine, "-") {
+		if strings.HasPrefix(trimmedLine, " ") || strings.HasPrefix(trimmedLine, "-") {
 			contextLines = append(contextLines, trimmedLine[1:])
 		}
-		if len(contextLines) == 3 { // Get first 3 context lines
-			break
+		if len(contextLines) >= 3 {
+			break // Use up to 3 context lines
 		}
 	}
 
-	// Check each position in the file
+	if len(contextLines) == 0 {
+		return -1
+	}
+
+	// Search around the hunk's expected start line (0-based)
+	startSearch := hunk.StartLine - 3
+	if startSearch < 0 {
+		startSearch = 0
+	}
+	endSearch := hunk.StartLine + 3
+	if endSearch > len(lines) {
+		endSearch = len(lines)
+	}
+
+	for i := startSearch; i < endSearch; i++ {
+		matches := 0
+		for j, ctx := range contextLines {
+			if i+j >= len(lines) {
+				break
+			}
+			fileLine := strings.TrimRight(lines[i+j], "\n")
+			if fileLine == ctx {
+				matches++
+			} else {
+				break
+			}
+		}
+		if matches == len(contextLines) {
+			return i
+		}
+	}
+
+	// Fallback: search entire file
 	for i := 0; i < len(lines); i++ {
 		matches := 0
 		for j, ctx := range contextLines {
@@ -112,19 +142,20 @@ func findHunkPosition(lines []string, hunk Hunk) int {
 			fileLine := strings.TrimRight(lines[i+j], "\n")
 			if fileLine == ctx {
 				matches++
+			} else {
+				break
 			}
 		}
 		if matches == len(contextLines) {
-			// Found matching context at position i
 			return i
 		}
 	}
+
 	return -1
 }
 
 func applyHunks(original []string, hunks []Hunk) []string {
-	result := make([]string, len(original))
-	copy(result, original)
+	result := original
 
 	for _, hunk := range hunks {
 		pos := findHunkPosition(result, hunk)
@@ -132,31 +163,27 @@ func applyHunks(original []string, hunks []Hunk) []string {
 			continue
 		}
 
-		updated := make([]string, 0, len(result))
-		updated = append(updated, result[:pos]...)
+		// Remove hunk.Length lines starting at pos
+		end := pos + hunk.Length
+		if end > len(result) {
+			end = len(result)
+		}
+		before := result[:pos]
+		after := result[end:]
 
-		currentPos := pos
-
+		// Prepare new lines from the hunk
+		var newLines []string
 		for _, line := range hunk.Lines {
-			switch {
-			case strings.HasPrefix(line, " "):
-				if currentPos < len(result) {
-					updated = append(updated, result[currentPos])
-					currentPos++
-				}
-			case strings.HasPrefix(line, "+"):
-				updated = append(updated, line[1:])
-			case strings.HasPrefix(line, "-"):
-				currentPos++
+			trimmed := strings.TrimRight(line, "\n")
+			if strings.HasPrefix(trimmed, "+") {
+				newLines = append(newLines, trimmed[1:]+"\n")
+			} else if strings.HasPrefix(trimmed, " ") {
+				newLines = append(newLines, trimmed[1:]+"\n")
 			}
 		}
 
-		// Only append remaining content if we haven't exceeded bounds
-		if currentPos < len(result) {
-			updated = append(updated, result[currentPos:]...)
-		}
-
-		result = updated
+		// Rebuild the result
+		result = append(before, append(newLines, after...)...)
 	}
 
 	return result

@@ -38,6 +38,7 @@ func main() {
 		fmt.Print("> ")
 
 		line, err := rl.Readline()
+		fmt.Printf("DEBUG: line='%s', err='%v'\n", line, err)
 		if err != nil { // io.EOF, readline.ErrInterrupt
 			break
 		}
