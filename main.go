@@ -1,8 +1,8 @@
 package main
 
 import (
+	"aaai/anthropic"
 	"aaai/diff"
-	"aaai/groq"
 	"aaai/prompt"
 	"fmt"
 	"os"
@@ -33,10 +33,11 @@ func main() {
 		fmt.Println("Please set GROQ environment variable")
 		return
 	}
+	apiKey = os.Getenv("ANTHROPIC_API_KEY")
 
-	//client := anthropic.NewClient(apiKey)
+	client := anthropic.NewClient(apiKey)
 	//client := deepseek.NewClient(apiKey)
-	client := groq.NewClient(apiKey)
+	//client := groq.NewClient(apiKey)
 
 	rl, _ := readline.NewEx(&readline.Config{
 		Prompt:          "> ",

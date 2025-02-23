@@ -7,10 +7,10 @@ import (
 	"os/exec"
 	"path/filepath"
 	"time"
+	"runtime"
 
 	"github.com/go-rod/rod"
 )
-
 func main() {
 	s, _ := fetchStoriesSync()
 
@@ -22,6 +22,8 @@ func main() {
 		// One argument - check if it's "screenshots"
 		if os.Args[1] == "screenshots" {
 			takeAllScreenshots(s)
+			combineScreenshots()
+			openImage("combined.jpg")
 		} else if os.Args[1] == "combine" {
 			combineScreenshots()
 		} else {
@@ -101,6 +103,27 @@ func captureScreenshot(url string) []byte {
 
 func saveScreenshot(data []byte, filename string) error {
 	return os.WriteFile(filename, data, 0644)
+}
+
+func openImage(filename string) {
+	var cmd *exec.Cmd
+	
+	switch runtime.GOOS {
+	case "darwin": // macOS
+		cmd = exec.Command("open", filename)
+	case "windows":
+		cmd = exec.Command("cmd", "/c", "start", filename)
+	default: // Linux and others
+		cmd = exec.Command("xdg-open", filename)
+	}
+	
+	err := cmd.Start()
+	if err != nil {
+		fmt.Printf("Error opening image: %v\n", err)
+		return
+	}
+	
+	cmd.Wait()
 }
 
 func combineScreenshots() {
