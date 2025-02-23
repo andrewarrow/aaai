@@ -14,7 +14,8 @@ func NewPromptManager(request string) *PromptManager {
 Follow the indentation and style of the existing code.
 Keep line length to 80 characters or less unless other conventions override.
 Update all imports needed by your changes.
-List each file using the CodeFence.
+List each file using the CodeFence and the string diff after the fence.
+Make sure to list +++ and the filename and --- and the filename at start of each diff.
 Use unified diff format with 3 lines of context.` + request,
 		CodeFence: "```",
 	}

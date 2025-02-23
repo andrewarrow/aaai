@@ -23,6 +23,8 @@ func ParseDiffs(response string) map[string]string {
 			if strings.HasPrefix(line, "+++ ") {
 				filename = strings.TrimPrefix(line, "+++ ")
 				filename = strings.TrimSpace(filename)
+				tokens := strings.Split(filename, "/")
+				filename = tokens[len(tokens)-1]
 			}
 			newLines = append(newLines, line)
 		}
