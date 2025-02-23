@@ -46,6 +46,7 @@ func main() {
 		EOFPrompt:       "quit",
 	})
 
+	buffer := []string{}
 	for {
 		fcs := prompt.AssembleFiles(dir)
 		fmt.Print("> ")
@@ -60,21 +61,26 @@ func main() {
 		if input == "quit" || input == "exit" {
 			break
 		}
-
-		p := prompt.MakePrompt(input, fcs)
-		s, err := client.Complete(p)
-		fmt.Println(err)
-		fmt.Println("")
-		fmt.Println("")
-		fmt.Println("")
-		fmt.Println("")
-		fmt.Println(s)
-		m := prompt.ParseDiffs(s)
-		fmt.Println("===")
-		fmt.Println(m)
-		fmt.Println("===")
-		for k, v := range m {
-			diff.ApplyPatch(dir+"/"+k, v)
+		if input == "." {
+			p := prompt.MakePrompt(strings.Join(buffer, "\n"), fcs)
+			s, err := client.Complete(p)
+			fmt.Println(err)
+			fmt.Println("")
+			fmt.Println("")
+			fmt.Println("")
+			fmt.Println("")
+			fmt.Println(s)
+			m := prompt.ParseDiffs(s)
+			fmt.Println("===")
+			fmt.Println(m)
+			fmt.Println("===")
+			for k, v := range m {
+				diff.ApplyPatch(dir+"/"+k, v)
+			}
+			buffer = []string{}
+		} else {
+			buffer = append(buffer, input)
 		}
+
 	}
 }
