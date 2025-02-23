@@ -2,7 +2,6 @@ package main
 
 import (
 	"aaai/anthropic"
-	"aaai/diff"
 	"aaai/prompt"
 	"fmt"
 	"os"
@@ -49,6 +48,12 @@ func main() {
 
 		p := prompt.MakePrompt(input, fcs)
 		s, _ := client.Complete(p)
-		diff.ProcessDiffs(dir, s)
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println("")
+		fmt.Println(s)
+		//diff.ProcessDiffs(dir, s)
 	}
 }

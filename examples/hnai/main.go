@@ -1,8 +1,11 @@
 package main
 
-import "fmt"
 import (
 	"fmt"
+	"os"
+	"strconv"
+)
+
 func main() {
 	if len(os.Args) > 1 {
 		id, err := strconv.Atoi(os.Args[1])
@@ -25,9 +28,6 @@ func main() {
 
 	s, _ := fetchStoriesSync()
 	for _, item := range s {
-		fmt.Println(item.ID)
-		fmt.Println(item.Title)
-	}
 		fmt.Println(item.ID)
 		fmt.Println(item.Title)
 	}

@@ -10,51 +10,11 @@ import (
 
 func NewPromptManager(request string) *PromptManager {
 	return &PromptManager{
-		SystemPrompt: `You are a skilled programmer helping edit code. Reply only in json.
-Characters from U+0000 through U+001F must be escaped in the json.
+		SystemPrompt: `You are a skilled programmer helping edit code, using unified diffs.
 Follow the indentation and style of the existing code.
 Keep line length to 80 characters or less unless other conventions override.
 Update all imports needed by your changes.
-Use this json format to send back diffs
-
-[
-{
-  "file": "file1.go",
-  "ranges": [
-    {
-      "s": 42,     // start line
-      "e": 42,     // end line
-      "b": ["func oldName(x, y int) bool {"],  // before
-      "a": ["func newName(x, y int) int {"]   // after
-    },
-    {
-      "s": 47,
-      "e": 49,
-      "b": [
-        "  if (x > 0) {",
-        "    return true;",
-        "  }"
-      ],
-      "a": [
-        "  if (x > 0 && y < 100) {",
-        "    return x * y;",
-        "  }"
-      ]
-    }
-  ]
-},
-{
-  "file": "file2.go",
-  "ranges": [
-    {
-      "s": 22,     // start line
-      "e": 22,     // end line
-      "b": ["func oldName2(x, y int) bool {"],  // before
-      "a": ["func newName2(x, y int) bool{"]   // after
-    }
-  ]
-}]
-. ` + request,
+Use unified diff format with 3 lines of context.` + request,
 		CodeFence: "```",
 	}
 }
