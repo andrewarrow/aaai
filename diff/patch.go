@@ -4,100 +4,116 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 )
 
+// Change represents a modification to a file
+type Change struct {
+	File   string  `json:"file"`
+	Ranges []Range `json:"ranges"`
+}
+
+// Range represents a specific change within a file
+type Range struct {
+	Start  int      `json:"s"` // Start line number (1-based)
+	End    int      `json:"e"` // End line number (1-based)
+	Before []string `json:"b"` // Lines before the change
+	After  []string `json:"a"` // Lines after the change
+}
+
 func ProcessDiffs(dir, jsonData string) error {
-	// Parse the JSON
 	var changes []Change
-	err := json.Unmarshal([]byte(sanitizeJSON(jsonData)), &changes)
-	if err != nil {
+	if err := json.Unmarshal([]byte(sanitizeJSON(jsonData)), &changes); err != nil {
 		return fmt.Errorf("error parsing JSON: %w", err)
 	}
 
-	// Process each change
 	for _, change := range changes {
-		if err := processFileChange(dir, change); err != nil {
-			return fmt.Errorf("error processing file %s: %w", change.File, err)
+		if err := applyChange(dir, change); err != nil {
+			return fmt.Errorf("error processing %s: %w", change.File, err)
 		}
 		fmt.Printf("Successfully updated file: %s\n", change.File)
 	}
 	return nil
 }
 
-func processFileChange(dir string, change Change) error {
-	// Read the original file
+func applyChange(dir string, change Change) error {
+	// Read file content
 	content, err := os.ReadFile(dir + "/" + change.File)
 	if err != nil {
 		return fmt.Errorf("error reading file: %w", err)
 	}
 
+	// Split into lines and remove trailing empty line if present
 	lines := strings.Split(string(content), "\n")
+	if len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
 
-	// Process each range change
+	// Sort ranges in descending order to apply from bottom to top
+	sort.Slice(change.Ranges, func(i, j int) bool {
+		return change.Ranges[i].Start > change.Ranges[j].Start
+	})
+
+	// Apply each range change
 	for _, r := range change.Ranges {
-		// Validate range bounds
-		if err := validateRange(r, len(lines)); err != nil {
+		start := r.Start - 1 // Convert to 0-based
+		end := r.End - 1
+
+		// Validate range
+		if err := validateRange(start, end, len(lines)); err != nil {
 			return err
 		}
 
-		// Create new content with proper capacity
-		newLines := make([]string, 0, len(lines)+(len(r.After)-len(r.Before)))
-
-		// Append lines before the change
-		newLines = append(newLines, lines[:r.Start]...)
-
-		// Append the new lines
-		newLines = append(newLines, r.After...)
-
-		// Append remaining lines after the change, checking bounds
-		if r.End+1 <= len(lines) {
-			newLines = append(newLines, lines[r.End+1:]...)
+		// Verify the "before" content matches
+		if !matchesBeforeLines(lines[start:end+1], r.Before) {
+			return fmt.Errorf("content mismatch at lines %d-%d", r.Start, r.End)
 		}
 
-		lines = newLines
+		// Replace the range with new content
+		lines = append(append(lines[:start], r.After...), lines[end+1:]...)
 	}
 
-	// Write the modified content back to the file
-	newContent := strings.Join(lines, "\n")
-	if err := os.WriteFile(dir+"/"+change.File, []byte(newContent), 0644); err != nil {
-		return fmt.Errorf("error writing file: %w", err)
-	}
+	// Ensure trailing newline
+	lines = append(lines, "")
 
-	return nil
+	// Write back to file
+	return os.WriteFile(dir+"/"+change.File, []byte(strings.Join(lines, "\n")), 0644)
 }
 
-func validateRange(r Range, lineCount int) error {
-	if r.Start < 0 {
-		return fmt.Errorf("invalid start line: %d", r.Start)
-	}
-	if r.End >= lineCount {
-		return fmt.Errorf("invalid end line: %d (file has %d lines)", r.End, lineCount)
-	}
-	if r.Start > r.End {
-		return fmt.Errorf("start line (%d) is after end line (%d)", r.Start, r.End)
-	}
-	return nil
-}
-
-// compareLines compares two string slices for equality, ignoring trailing whitespace
-func compareLines(a, b []string) bool {
-	if len(a) != len(b) {
+func matchesBeforeLines(fileLines, beforeLines []string) bool {
+	if len(fileLines) != len(beforeLines) {
 		return false
 	}
-	for i := range a {
-		if strings.TrimRight(a[i], " \t\r\n") != strings.TrimRight(b[i], " \t\r\n") {
+	for i := range fileLines {
+		if fileLines[i] != beforeLines[i] {
 			return false
 		}
 	}
 	return true
 }
 
-func sanitizeJSON(input string) string {
-	// Replace literal tabs with \t escape sequence
-	sanitized := strings.ReplaceAll(input, "\t", "\\t")
-	if !strings.HasPrefix(sanitized, "[") {
-		return "[" + sanitized + "]"
+func validateRange(start, end, lineCount int) error {
+	if start < 0 {
+		return fmt.Errorf("invalid start line: %d", start+1)
 	}
-	return sanitized
+	if end >= lineCount {
+		return fmt.Errorf("invalid end line: %d (file has %d lines)", end+1, lineCount)
+	}
+	if start > end {
+		return fmt.Errorf("start line (%d) is after end line (%d)", start+1, end+1)
+	}
+	return nil
+}
+
+func sanitizeJSON(input string) string {
+	input = strings.TrimSpace(input)
+	input = strings.ReplaceAll(input, "\t", "\\t")
+	if !strings.HasPrefix(input, "[") {
+		input = "[" + input
+	}
+	if !strings.HasSuffix(input, "]") {
+		input = input + "]"
+	}
+	return input
 }
