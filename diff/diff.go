@@ -88,32 +88,34 @@ func parseHunks(diffLines []string) []Hunk {
 }
 
 func findHunkPosition(lines []string, hunk Hunk) int {
-	// Get the first few context lines from the hunk
-	contextLines := make([]string, 0)
+	// Get context lines from the hunk (leading lines that start with space or minus)
+	var contextLines []string
 	for _, line := range hunk.Lines {
-		if strings.HasPrefix(line, " ") || strings.HasPrefix(line, "-") {
-			trimmed := strings.TrimSpace(strings.TrimPrefix(strings.TrimPrefix(line, " "), "-"))
-			if trimmed != "" {
-				contextLines = append(contextLines, trimmed)
-				if len(contextLines) == 3 {
-					break
-				}
-			}
+		trimmedLine := strings.TrimRight(line, "\n")
+		if strings.HasPrefix(trimmedLine, " ") {
+			contextLines = append(contextLines, trimmedLine[1:])
+		} else if strings.HasPrefix(trimmedLine, "-") {
+			contextLines = append(contextLines, trimmedLine[1:])
+		}
+		if len(contextLines) == 3 { // Get first 3 context lines
+			break
 		}
 	}
 
-	// Look for matching context
+	// Check each position in the file
 	for i := 0; i < len(lines); i++ {
 		matches := 0
 		for j, ctx := range contextLines {
 			if i+j >= len(lines) {
 				break
 			}
-			if strings.TrimSpace(lines[i+j]) == ctx {
+			fileLine := strings.TrimRight(lines[i+j], "\n")
+			if fileLine == ctx {
 				matches++
 			}
 		}
 		if matches == len(contextLines) {
+			// Found matching context at position i
 			return i
 		}
 	}
@@ -130,24 +132,31 @@ func applyHunks(original []string, hunks []Hunk) []string {
 			continue
 		}
 
-		before := result[:pos]
-		var newContent []string
-		skipLines := 0
+		updated := make([]string, 0, len(result))
+		updated = append(updated, result[:pos]...)
+
+		currentPos := pos
 
 		for _, line := range hunk.Lines {
 			switch {
 			case strings.HasPrefix(line, " "):
-				newContent = append(newContent, line[1:])
-				skipLines++
+				if currentPos < len(result) {
+					updated = append(updated, result[currentPos])
+					currentPos++
+				}
 			case strings.HasPrefix(line, "+"):
-				newContent = append(newContent, line[1:])
+				updated = append(updated, line[1:])
 			case strings.HasPrefix(line, "-"):
-				skipLines++
+				currentPos++
 			}
 		}
 
-		after := result[pos+skipLines:]
-		result = append(before, append(newContent, after...)...)
+		// Only append remaining content if we haven't exceeded bounds
+		if currentPos < len(result) {
+			updated = append(updated, result[currentPos:]...)
+		}
+
+		result = updated
 	}
 
 	return result
