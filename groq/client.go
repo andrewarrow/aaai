@@ -54,7 +54,7 @@ func NewClient(apiKey string) *Client {
 
 func (c *Client) Complete(promptString string) (string, error) {
 	req := CompletionRequest{
-		Model:  "mixtral-8x7b-32768", // Replace with the appropriate model name for Groq
+		Model:  "deepseek-r1-distill-llama-70b", // Replace with the appropriate model name for Groq
 		Stream: true,
 		Messages: []Message{
 			{
