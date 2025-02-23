@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	"github.com/go-rod/rod"
@@ -20,11 +22,14 @@ func main() {
 		// One argument - check if it's "screenshots"
 		if os.Args[1] == "screenshots" {
 			takeAllScreenshots(s)
+		} else if os.Args[1] == "combine" {
+			combineScreenshots()
 		} else {
 			fmt.Println("Usage:")
 			fmt.Println("  No args: Show story list")
 			fmt.Println("  screenshots: Take screenshots of all stories")
 			fmt.Println("  story <ID>: Show and screenshot specific story")
+			fmt.Println("  combine: Combine all JPG screenshots vertically")
 		}
 	case 3:
 		// Two arguments - must be "story" and ID
@@ -96,4 +101,25 @@ func captureScreenshot(url string) []byte {
 
 func saveScreenshot(data []byte, filename string) error {
 	return os.WriteFile(filename, data, 0644)
+}
+
+func combineScreenshots() {
+	// Get all jpg files in current directory
+	files, err := filepath.Glob("*.jpg")
+	if err != nil {
+		fmt.Printf("Error finding JPG files: %v\n", err)
+		return
+	}
+
+	if len(files) == 0 {
+		fmt.Println("No JPG files found to combine")
+		return
+	}
+
+	// Run ImageMagick convert command to combine vertically
+	cmd := exec.Command("convert", append(files, "-append", "combined.jpg")...)
+	if err := cmd.Run(); err != nil {
+		fmt.Printf("Error combining images: %v\n", err)
+		return
+	}
 }
