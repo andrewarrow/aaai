@@ -109,7 +109,7 @@ func (c *Client) Complete(promptString string) (string, error) {
 			break
 		}
 
-		parser.ProcessLine(firstChoice(data))
+		parser.ProcessLineAsString(firstChoice(data))
 	}
 	return parser.Result(), nil
 }
