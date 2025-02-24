@@ -49,6 +49,7 @@ func main() {
 	buffer := []string{}
 	for {
 		fcs := prompt.AssembleFiles(dir)
+
 		fmt.Print("> ")
 
 		line, err := rl.Readline()

@@ -2,22 +2,49 @@ package prompt
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 )
 
+const maxFiles = 90
+
 func AssembleFiles(dir string) []FileContent {
-	files, _ := os.ReadDir(dir)
 	buffer := []FileContent{}
-	for _, file := range files {
-		name := file.Name()
-		if strings.HasSuffix(name, ".go") == false {
-			continue
+
+	// Walk through directory recursively
+	filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
 		}
+
+		// Check if we've reached the max files limit
+		if len(buffer) >= maxFiles {
+			return filepath.SkipDir
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Only process .go files
+		if !strings.HasSuffix(info.Name(), ".go") {
+			return nil
+		}
+
+		// Get relative path from root dir
+		relPath, err := filepath.Rel(dir, path)
+		if err != nil {
+			return nil
+		}
+
 		fc := FileContent{}
-		fc.Filename = file.Name()
-		goFile, _ := os.ReadFile(dir + "/" + name)
+		fc.Filename = relPath
+		goFile, _ := os.ReadFile(path)
 		fc.Content = string(goFile)
 		buffer = append(buffer, fc)
-	}
+		return nil
+	})
+
 	return buffer
 }

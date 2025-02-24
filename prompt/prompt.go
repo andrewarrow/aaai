@@ -44,6 +44,7 @@ func (pm *PromptManager) BuildPrompt(userRequest string) string {
 	buf.WriteString("\n\n")
 
 	for _, file := range pm.Files {
+		fmt.Println(file.Filename)
 		ext := filepath.Ext(file.Filename)
 		lang := strings.TrimPrefix(ext, ".")
 		if lang == "" {

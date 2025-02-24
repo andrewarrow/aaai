@@ -179,7 +179,7 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		if pos == -1 {
 			continue
 		}
-
+ 
 		// Remove hunk.Length lines starting at pos
 		end := pos + hunk.Length
 		if end > len(result) {
@@ -187,16 +187,19 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		}
 		before := result[:pos]
 		after := result[end:]
-
-		// Prepare new lines from the hunk - KEY FIX HERE
+ 
+		// Prepare new lines from the hunk
 		var newLines []string
 		for _, line := range hunk.Lines {
-			trimmed := strings.TrimRight(line, "\n")
-			if strings.HasPrefix(trimmed, "+") || strings.HasPrefix(trimmed, " ") {
-				newLines = append(newLines, trimmed[1:]+"\n")
+			if strings.HasPrefix(line, "+") || strings.HasPrefix(line, " ") {
+				newLine := line[1:]
+				// Ensure line has exactly one newline at the end
+				newLine = strings.TrimRight(newLine, "\n") + "\n"
+				newLines = append(newLines, newLine)
 			}
 		}
-
+ 
+		// Combine the parts ensuring no duplicate newlines
 		// Rebuild the result
 		result = append(before, append(newLines, after...)...)
 	}
