@@ -13,11 +13,7 @@ import (
 )
 
 func ApplyPatch(fileOrig, fileDiff string) {
-	linesOrig, err := readLines(fileOrig)
-	if err != nil {
-		fmt.Printf("Error reading %s: %v\n", fileOrig, err)
-		os.Exit(1)
-	}
+	linesOrig, _ := readLines(fileOrig)
 
 	linesDiff, err := readLinesFromString(fileDiff)
 	if err != nil {
