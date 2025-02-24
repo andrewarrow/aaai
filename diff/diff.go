@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -265,6 +266,12 @@ func readLines(filename string) ([]string, error) {
 }
 
 func writeLines(filename string, lines []string) error {
+	// Create all parent directories if they don't exist
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directories for %s: %v", filename, err)
+	}
+
 	file, err := os.Create(filename)
 	if err != nil {
 		return err

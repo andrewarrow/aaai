@@ -20,8 +20,8 @@ func ParseDiffs(response string) map[string]string {
 		lines := strings.Split(diffContent, "\n")
 		var filename string
 		for _, line := range lines {
-			if strings.HasPrefix(line, "--- ") {
-				filename = strings.TrimPrefix(line, "--- ")
+			if strings.HasPrefix(line, "+++ ") {
+				filename = strings.TrimPrefix(line, "+++ ")
 				filename = strings.TrimSpace(filename)
 
 				// Handle a/ and b/ prefixes
