@@ -52,7 +52,7 @@ func main() {
 		fmt.Print("> ")
 
 		line, err := rl.Readline()
-		fmt.Printf("DEBUG: line='%s', err='%v'\n", line, err)
+		//fmt.Printf("DEBUG: line='%s', err='%v'\n", line, err)
 		if err != nil { // io.EOF, readline.ErrInterrupt
 			break
 		}
@@ -62,7 +62,11 @@ func main() {
 			break
 		}
 		if input == "." {
-			p := prompt.MakePrompt(strings.Join(buffer, "\n"), fcs)
+			joined := strings.Join(buffer, "\\n")
+			os.WriteFile(".aaai.input.history", []byte(joined), 0644)
+
+			joined = strings.Join(buffer, "\n")
+			p := prompt.MakePrompt(joined, fcs)
 			s, err := client.Complete(p)
 			fmt.Println(err)
 			fmt.Println("")

@@ -23,9 +23,16 @@ func ParseDiffs(response string) map[string]string {
 			if strings.HasPrefix(line, "+++ ") {
 				filename = strings.TrimPrefix(line, "+++ ")
 				filename = strings.TrimSpace(filename)
-				tokens := strings.Split(filename, "/")
-				filename = tokens[len(tokens)-1]
+				
+				// Handle a/ and b/ prefixes
+				if strings.HasPrefix(filename, "a/") || strings.HasPrefix(filename, "b/") {
+					filename = filename[2:]
+				}
+				
+				// Keep the full path but clean up any "./" prefixes
+				filename = strings.TrimPrefix(filename, "./")
 			}
+			
 			newLines = append(newLines, line)
 		}
 
