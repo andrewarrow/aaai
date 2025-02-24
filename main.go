@@ -6,6 +6,7 @@ import (
 	"aaai/prompt"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -47,9 +48,9 @@ func main() {
 	})
 
 	buffer := []string{}
+
 	for {
 		fcs := prompt.AssembleFiles(dir)
-
 		fmt.Print("> ")
 
 		line, err := rl.Readline()
@@ -59,13 +60,18 @@ func main() {
 		}
 
 		input := strings.TrimSpace(line)
-		if input == "quit" || input == "exit" {
-			break
-		}
+
 		if input == "." {
 			joined := strings.Join(buffer, "\\n")
-			os.WriteFile(".aaai.input.history", []byte(joined), 0644)
 
+			// Open history file in append mode
+			historyFile, err := os.OpenFile(".aaai.input.history", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err == nil {
+				historyFile.WriteString(joined + "\n")
+				historyFile.Close()
+			}
+
+			// Process the command
 			joined = strings.Join(buffer, "\n")
 			p := prompt.MakePrompt(joined, fcs)
 			s, err := client.Complete(p)
@@ -79,7 +85,31 @@ func main() {
 			fmt.Println("===")
 			fmt.Println(m)
 			fmt.Println("===")
+
+			// Create tests directory if it doesn't exist
+			testsDir := "tests"
+			if err := os.MkdirAll(testsDir, 0755); err != nil {
+				fmt.Printf("Error creating tests directory: %v\n", err)
+				continue
+			}
+
 			for k, v := range m {
+				// Get original file content
+				origContent, err := os.ReadFile(filepath.Join(dir, k))
+				if err != nil {
+					fmt.Printf("Error reading original file %s: %v\n", k, err)
+					continue
+				}
+
+				// Write original file to tests/file.orig
+				origPath := filepath.Join(testsDir, k+".orig")
+				if err := os.MkdirAll(filepath.Dir(origPath), 0755); err != nil {
+					fmt.Printf("Error creating directory for %s: %v\n", origPath, err)
+					continue
+				}
+				os.WriteFile(origPath, origContent, 0644)
+				// Write diff to tests/file.diff
+				os.WriteFile(filepath.Join(testsDir, k+".diff"), []byte(v), 0644)
 				diff.ApplyPatch(dir+"/"+k, v)
 			}
 			buffer = []string{}
