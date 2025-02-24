@@ -180,7 +180,7 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		if pos == -1 {
 			continue
 		}
- 
+
 		// Remove hunk.Length lines starting at pos
 		end := pos + hunk.Length
 		if end > len(result) {
@@ -188,7 +188,7 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		}
 		before := result[:pos]
 		after := result[end:]
- 
+
 		// Prepare new lines from the hunk
 		var newLines []string
 		for _, line := range hunk.Lines {
@@ -199,7 +199,7 @@ func applyHunks(original []string, hunks []Hunk) []string {
 				newLines = append(newLines, newLine)
 			}
 		}
- 
+
 		// Combine the parts ensuring no duplicate newlines
 		// Rebuild the result
 		result = append(before, append(newLines, after...)...)
@@ -266,10 +266,21 @@ func readLines(filename string) ([]string, error) {
 }
 
 func writeLines(filename string, lines []string) error {
-	// Create all parent directories if they don't exist
-	dir := filepath.Dir(filename)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directories for %s: %v", filename, err)
+	// Convert to absolute path and clean it
+	absPath, err := filepath.Abs(filename)
+	if err != nil {
+		return fmt.Errorf("failed to get absolute path for %s: %v", filename, err)
+	}
+
+	// Get the directory path
+	dir := filepath.Dir(absPath)
+
+	// Ensure directory exists with proper permissions
+	err = os.MkdirAll(dir, 0755)
+	if err != nil && !os.IsExist(err) {
+		if os.IsPermission(err) {
+			return fmt.Errorf("permission denied creating directory %s: %v", dir, err)
+		}
 	}
 
 	file, err := os.Create(filename)

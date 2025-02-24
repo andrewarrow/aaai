@@ -8,6 +8,10 @@ func ParseDiffs(response string) map[string]string {
 	diffs := make(map[string]string)
 
 	sections := strings.Split(response, "```diff")
+	sections2 := strings.Split(response, "```go")
+	if len(sections) == 0 {
+		sections = sections2
+	}
 
 	for _, section := range sections[1:] { // Skip first section (pre-diff text)
 		parts := strings.SplitN(section, "```", 2)
