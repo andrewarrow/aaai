@@ -266,20 +266,11 @@ func readLines(filename string) ([]string, error) {
 }
 
 func writeLines(filename string, lines []string) error {
-	// Convert to absolute path and clean it
-	absPath, err := filepath.Abs(filename)
-	if err != nil {
-		return fmt.Errorf("failed to get absolute path for %s: %v", filename, err)
-	}
 
-	// Get the directory path
-	dir := filepath.Dir(absPath)
-
-	// Ensure directory exists with proper permissions
-	err = os.MkdirAll(dir, 0755)
+	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil && !os.IsExist(err) {
 		if os.IsPermission(err) {
-			return fmt.Errorf("permission denied creating directory %s: %v", dir, err)
+			return fmt.Errorf("permission denied creating directory: %v", err)
 		}
 	}
 

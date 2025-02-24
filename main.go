@@ -95,11 +95,7 @@ func main() {
 
 			for k, v := range m {
 				// Get original file content
-				origContent, err := os.ReadFile(filepath.Join(dir, k))
-				if err != nil {
-					fmt.Printf("Error reading original file %s: %v\n", k, err)
-					continue
-				}
+				origContent, origErr := os.ReadFile(filepath.Join(dir, k))
 
 				// Write original file to tests/file.orig
 				origPath := filepath.Join(testsDir, k+".orig")
@@ -107,7 +103,9 @@ func main() {
 					fmt.Printf("Error creating directory for %s: %v\n", origPath, err)
 					continue
 				}
-				os.WriteFile(origPath, origContent, 0644)
+				if origErr == nil {
+					os.WriteFile(origPath, origContent, 0644)
+				}
 				// Write diff to tests/file.diff
 				os.WriteFile(filepath.Join(testsDir, k+".diff"), []byte(v), 0644)
 				diff.ApplyPatch(dir+"/"+k, v)
