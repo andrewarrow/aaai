@@ -68,36 +68,6 @@ func (pm *PromptManager) BuildPrompt(userRequest string) string {
 	return buf.String()
 }
 
-func (pm *PromptManager) ParseDiffs(response string) map[string][]string {
-	diffs := make(map[string][]string)
-
-	sections := strings.Split(response, "```diff")
-
-	for _, section := range sections[1:] { // Skip first section (pre-diff text)
-		parts := strings.SplitN(section, "```", 2)
-		if len(parts) < 1 {
-			continue
-		}
-		diffContent := parts[0]
-
-		lines := strings.Split(diffContent, "\n")
-		var filename string
-		for _, line := range lines {
-			if strings.HasPrefix(line, "+++ ") {
-				filename = strings.TrimPrefix(line, "+++ ")
-				filename = strings.TrimSpace(filename)
-				break
-			}
-		}
-
-		if filename != "" {
-			diffs[filename] = lines
-		}
-	}
-
-	return diffs
-}
-
 func MakePrompt(request string, files []FileContent) string {
 	pm := NewPromptManager(request)
 
