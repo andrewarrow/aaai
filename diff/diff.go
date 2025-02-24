@@ -14,11 +14,20 @@ import (
 
 func ApplyPatch(fileOrig, fileDiff string) {
 	linesOrig, _ := readLines(fileOrig)
+	if linesOrig == nil {
+		linesOrig = []string{} // Initialize empty slice for new files
+	}
 
 	linesDiff, err := readLinesFromString(fileDiff)
 	if err != nil {
 		fmt.Printf("Error reading %s: %v\n", fileDiff, err)
 		os.Exit(1)
+	}
+	
+	// Special case - if original file is empty and diff adds new content
+	if len(linesOrig) == 0 && len(linesDiff) > 0 {
+		handleNewFile(fileOrig, linesDiff)
+		return
 	}
 
 	// Parse unified diff into hunks
@@ -33,6 +42,24 @@ func ApplyPatch(fileOrig, fileDiff string) {
 		fmt.Printf("Error writing to %s: %v\n", fileOrig, err)
 		os.Exit(1)
 	}
+}
+
+func handleNewFile(filename string, diffLines []string) {
+	var newLines []string
+	for _, line := range diffLines {
+		// Skip diff metadata lines
+		if strings.HasPrefix(line, "---") || 
+		   strings.HasPrefix(line, "+++") ||
+		   strings.HasPrefix(line, "@@") {
+			continue  
+		}
+		// Only include added lines, removing the + prefix
+		if strings.HasPrefix(line, "+") {
+			newLine := strings.TrimPrefix(line, "+")
+			newLines = append(newLines, newLine)
+		}
+	}
+	writeLines(filename, newLines)
 }
 
 type Hunk struct {
