@@ -81,7 +81,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// Routes
-	e.GET("/", welcomePage)
+	e.GET("/", dashboard)
 	e.GET("/tasks", getTasks)
 	e.POST("/tasks", createTask)
 	e.PUT("/tasks/:id", updateTask)
@@ -91,12 +91,32 @@ func main() {
 	e.Logger.Fatal(e.Start(":8080"))
 }
 
-// Handler for the welcome page
-func welcomePage(c echo.Context) error {
-	return c.Render(http.StatusOK, "welcome.html", nil)
-
+// Handler for the dashboard page
+func dashboard(c echo.Context) error {
+	rows, err := db.Query("SELECT id, title, completed, created_at FROM tasks ORDER BY created_at DESC")
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Failed to fetch tasks",
+		})
+	}
+	defer rows.Close()
+	
+	var tasks []Task
+	for rows.Next() {
+		var t Task
+		if err := rows.Scan(&t.ID, &t.Title, &t.Completed, &t.CreatedAt); err != nil {
+			continue
+		}
+		tasks = append(tasks, t)
+	}
+	
+	data := map[string]interface{}{
+		"PageTitle": "Task Manager Dashboard",
+		"Tasks":     tasks,
+		"TaskCount": len(tasks),
+	}
+	return c.Render(http.StatusOK, "dashboard.html", data)
 }
-
 // Handler to get all tasks
 
 // Handler to get all tasks
