@@ -1,3 +1,4 @@
 tasks.db
 go.sum
 vibecoders
+__pycache__

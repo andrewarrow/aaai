@@ -1,5 +1,6 @@
 name: aa
-runtime: python
+runtime:
+  name: python
 description: Google Cloud Go
 config:
   pulumi:tags:

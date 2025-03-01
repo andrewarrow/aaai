@@ -42,7 +42,7 @@ certbot certonly --manual -d 'inspiredby2.com' --preferred-challenges dns
 static_ip = gcp.compute.Address("alb2", region=region)
 
 compute_instance = gcp.compute.Instance(
-    "aa-aug-23-2024",
+    "aa-march-1-2025",
     machine_type="e2-micro",
     zone=zone,
     metadata_startup_script=startup_script,
