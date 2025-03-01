@@ -20,7 +20,7 @@ useradd aa
 mkdir /home/aa
 chown aa:aa /home/aa
 cd /home/aa
-curl "https://objects.githubusercontent.com/github-production-release-asset-2e65be/846781077/9df9114e-af19-4b7e-bec0-70c4599dd5bb?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=releaseassetproduction%2F20240824%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240824T011444Z&X-Amz-Expires=300&X-Amz-Signature=f3a65e4862c48080b6ea5ff92ec7df0a3bea006c664011333517a41715df0225&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=846781077&response-content-disposition=attachment%3B%20filename%3Dinspiredby2&response-content-type=application%2Foctet-stream" -o web-3000
+curl -L https://github.com/andrewarrow/aaai/releases/download/v0.0.1/vibecoders -o web-3000
 chmod +x /home/aa/web-3000
 mkdir /Users/aa
 chown -R aa:aa /home/aa
@@ -36,7 +36,7 @@ EOF
 
 apt-get install certbot
 #certbot certonly --standalone -d 'inspiredby2.com'
-certbot certonly --manual -d 'inspiredby2.com' --preferred-challenges dns
+#certbot certonly --manual -d 'andrewarrow.dev' --preferred-challenges dns
 """
 
 static_ip = gcp.compute.Address("alb2", region=region)
