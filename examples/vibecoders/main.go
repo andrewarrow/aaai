@@ -2,13 +2,15 @@ package main
 
 import (
 	"database/sql"
+	"embed"
+	"html/template"
+	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"time"
-	"html/template"
-	"io"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4" 
 	"github.com/labstack/echo/v4/middleware" 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -20,6 +22,10 @@ type Task struct {
 	Completed bool      `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+//go:embed templates/*.html
+var templateFS embed.FS
+
 
 // Template renderer
 type TemplateRenderer struct {
@@ -33,12 +39,16 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
 
 // Initialize templates
 func initTemplates() *TemplateRenderer {
-	return &TemplateRenderer{
-		templates: template.Must(template.ParseGlob("templates/*.html")),
+	// Get templates from embedded filesystem
+	templatesContent, err := fs.Sub(templateFS, "templates")
+	if err != nil {
+		log.Fatal(err)
 	}
+	
+	return &TemplateRenderer{
+		templates: template.Must(template.ParseFS(templatesContent, "*.html")),
+	} 
 }
-
-
 var db *sql.DB
 
 func initDB() {

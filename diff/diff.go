@@ -8,8 +8,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/sergi/go-diff/diffmatchpatch"
 )
 
 func ApplyPatch(fileOrig, fileDiff string) {
@@ -20,17 +18,13 @@ func ApplyPatch(fileOrig, fileDiff string) {
 
 	linesDiff, err := readLinesFromString(fileDiff)
 	if err != nil {
-		fmt.Printf("Error reading %s: %v\n", fileDiff, err)
+		fmt.Printf("Error reading diff: %v\n", err)
 		os.Exit(1)
 	}
 
-	// Parse unified diff into hunks
 	hunks := parseHunks(linesDiff)
-
-	// Apply all hunks at once
 	updatedLines := applyHunks(linesOrig, hunks)
 
-	// Write back to original file
 	err = writeLines(fileOrig, updatedLines)
 	if err != nil {
 		fmt.Printf("Error writing to %s: %v\n", fileOrig, err)
@@ -49,42 +43,32 @@ type Hunk struct {
 func parseHunks(diffLines []string) []Hunk {
 	var hunks []Hunk
 	var currentHunk *Hunk
-
 	hunkHeader := regexp.MustCompile(`@@ -(\d+),(\d+) \+(\d+),(\d+) @@`)
 
 	for _, line := range diffLines {
 		if strings.HasPrefix(line, "---") || strings.HasPrefix(line, "+++") {
 			continue
 		}
-
 		if match := hunkHeader.FindStringSubmatch(line); match != nil {
 			if currentHunk != nil {
 				hunks = append(hunks, *currentHunk)
 			}
 			start, _ := strconv.Atoi(match[1])
-			start-- // Convert to 0-based
+			start-- // 0-based
 			length, _ := strconv.Atoi(match[2])
 			newStart, _ := strconv.Atoi(match[3])
-			newStart-- // Convert to 0-based (though not used in applying patches)
+			newStart-- // 0-based
 			newLength, _ := strconv.Atoi(match[4])
-			currentHunk = &Hunk{
-				StartLine: start, // Now 0-based
-				Length:    length,
-				NewStart:  newStart,
-				NewLength: newLength,
-			}
+			currentHunk = &Hunk{StartLine: start, Length: length, NewStart: newStart, NewLength: newLength}
 			continue
 		}
-
 		if currentHunk != nil {
 			currentHunk.Lines = append(currentHunk.Lines, line)
 		}
 	}
-
 	if currentHunk != nil {
 		hunks = append(hunks, *currentHunk)
 	}
-
 	return hunks
 }
 
@@ -104,32 +88,26 @@ func findHunkPosition(lines []string, hunk Hunk) int {
 			contextLines = append(contextLines, trimmedLine[1:])
 		}
 	}
-
 	if len(contextLines) == 0 {
 		return -1
 	}
 
-	// First, check the expected start line
+	// Check expected position
 	i := hunk.StartLine
 	if i >= 0 && i <= len(lines)-len(contextLines) {
-		matches := 0
+		matches := true
 		for j, ctx := range contextLines {
-			if i+j >= len(lines) {
-				break
-			}
-			fileLine := strings.TrimRight(lines[i+j], "\n")
-			if fileLine == ctx {
-				matches++
-			} else {
+			if i+j >= len(lines) || strings.TrimRight(lines[i+j], "\n") != ctx {
+				matches = false
 				break
 			}
 		}
-		if matches == len(contextLines) {
+		if matches {
 			return i
 		}
 	}
 
-	// Search around the hunk's expected start line
+	// Search nearby
 	startSearch := hunk.StartLine - 3
 	if startSearch < 0 {
 		startSearch = 0
@@ -138,57 +116,46 @@ func findHunkPosition(lines []string, hunk Hunk) int {
 	if endSearch > len(lines) {
 		endSearch = len(lines)
 	}
-
-	for i := startSearch; i < endSearch; i++ {
-		matches := 0
+	for i := startSearch; i <= endSearch-len(contextLines); i++ {
+		matches := true
 		for j, ctx := range contextLines {
-			if i+j >= len(lines) {
-				break
-			}
-			fileLine := strings.TrimRight(lines[i+j], "\n")
-			if fileLine == ctx {
-				matches++
-			} else {
+			if i+j >= len(lines) || strings.TrimRight(lines[i+j], "\n") != ctx {
+				matches = false
 				break
 			}
 		}
-		if matches == len(contextLines) {
+		if matches {
 			return i
 		}
 	}
 
-	// Fallback: search entire file
-	for i := 0; i < len(lines); i++ {
-		matches := 0
+	// Search entire file
+	for i := 0; i <= len(lines)-len(contextLines); i++ {
+		matches := true
 		for j, ctx := range contextLines {
-			if i+j >= len(lines) {
-				break
-			}
-			fileLine := strings.TrimRight(lines[i+j], "\n")
-			if fileLine == ctx {
-				matches++
-			} else {
+			if strings.TrimRight(lines[i+j], "\n") != ctx {
+				matches = false
 				break
 			}
 		}
-		if matches == len(contextLines) {
+		if matches {
 			return i
 		}
 	}
-
 	return -1
 }
 
 func applyHunks(original []string, hunks []Hunk) []string {
-	result := original
+	result := make([]string, len(original))
+	copy(result, original)
 
-	for _, hunk := range hunks {
+	for i, hunk := range hunks {
 		pos := findHunkPosition(result, hunk)
 		if pos == -1 {
+			fmt.Printf("Warning: Hunk %d skipped (context not found at line %d)\n", i+1, hunk.StartLine+1)
 			continue
 		}
 
-		// Remove hunk.Length lines starting at pos
 		end := pos + hunk.Length
 		if end > len(result) {
 			end = len(result)
@@ -196,55 +163,18 @@ func applyHunks(original []string, hunks []Hunk) []string {
 		before := result[:pos]
 		after := result[end:]
 
-		// Prepare new lines from the hunk
 		var newLines []string
 		for _, line := range hunk.Lines {
 			if strings.HasPrefix(line, "+") || strings.HasPrefix(line, " ") {
 				newLine := line[1:]
-				// Ensure line has exactly one newline at the end
 				newLine = strings.TrimRight(newLine, "\n") + "\n"
 				newLines = append(newLines, newLine)
 			}
 		}
 
-		// Combine the parts
 		result = append(before, append(newLines, after...)...)
 	}
-
 	return result
-}
-
-func findLastNonDeleted(linesOrig []string, linesUpdated []string) int {
-	dmp := diffmatchpatch.New()
-	diffs := dmp.DiffMain(strings.Join(linesOrig, "\n"), strings.Join(linesUpdated, "\n"), false)
-
-	pos := 0
-	lastNonDeleted := 0
-	origText := strings.Join(linesOrig, "\n")
-
-	for _, diff := range diffs {
-		switch diff.Type {
-		case diffmatchpatch.DiffEqual:
-			pos += len(diff.Text)
-			lastNonDeleted = strings.Count(origText[:pos], "\n") + 1
-		case diffmatchpatch.DiffDelete:
-			pos += len(diff.Text)
-		}
-	}
-
-	return lastNonDeleted
-}
-
-func assertNewlines(lines []string) error {
-	if len(lines) == 0 {
-		return nil
-	}
-	for i, line := range lines[:len(lines)-1] {
-		if len(line) == 0 || !strings.HasSuffix(line, "\n") {
-			return fmt.Errorf("line %d does not end with newline", i)
-		}
-	}
-	return nil
 }
 
 func readLinesFromString(content string) ([]string, error) {
@@ -274,9 +204,7 @@ func readLines(filename string) ([]string, error) {
 func writeLines(filename string, lines []string) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil && !os.IsExist(err) {
-		if os.IsPermission(err) {
-			return fmt.Errorf("permission denied creating directory: %v", err)
-		}
+		return fmt.Errorf("error creating directory: %v", err)
 	}
 
 	file, err := os.Create(filename)
