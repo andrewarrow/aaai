@@ -57,6 +57,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// Routes
+	e.GET("/", welcomePage)
 	e.GET("/tasks", getTasks)
 	e.POST("/tasks", createTask)
 	e.PUT("/tasks/:id", updateTask)
@@ -64,6 +65,26 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
+}
+
+// Handler for the welcome page
+func welcomePage(c echo.Context) error {
+	welcomeHTML := `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task Manager API</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Task Manager API</h1>
+    <p>Use the /tasks endpoint to manage your tasks.</p>
+</body>
+</html>`
+	return c.HTML(http.StatusOK, welcomeHTML)
 }
 
 // Handler to get all tasks
