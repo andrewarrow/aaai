@@ -28,18 +28,21 @@ systemctl daemon-reload
 systemctl enable web-3000
 systemctl start web-3000
 
-apt-get install nginx
+apt-get update
+apt-get install -y musl
+apt-get install -y nginx
 systemctl stop nginx
 cat <<EOF > /etc/nginx/nginx.conf
 {nginx}
 EOF
 
-apt-get install certbot
+apt install -y certbot
 #certbot certonly --standalone -d 'inspiredby2.com'
 #certbot certonly --manual -d 'andrewarrow.dev' --preferred-challenges dns
 """
 
 static_ip = gcp.compute.Address("alb2", region=region)
+#existing_static_ip = gcp.compute.Address.get("existing-ip", "your-existing-ip-name", region=region)
 
 compute_instance = gcp.compute.Instance(
     "aa-march-1-2025",

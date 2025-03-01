@@ -7,7 +7,8 @@ Requires=network-online.target
 User=aa
 Group=aa
 EnvironmentFile=/etc/systemd/system/aa.conf
-ExecStart=/home/aa/web-3000 run 3000
+WorkingDirectory=/home/aa
+ExecStart=/home/aa/web-3000
 Restart=on-failure
 RestartSec=1s
 
