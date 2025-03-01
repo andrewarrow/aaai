@@ -32,7 +32,7 @@ func createTask(c echo.Context) error {
 		task.Title, task.Completed)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
-			"error": "Failed to create task",
+			"error": "Failed to create task: " + err.Error(),
 		})
 	}
 
