@@ -66,7 +66,7 @@ func NewClient(apiKey string) *Client {
 
 func (c *Client) Complete(promptString string) (string, error) {
 	req := CompletionRequest{
-		Model:  "claude-3-5-sonnet-20241022",
+		Model:  "claude-3-7-sonnet-20250219",
 		Stream: true,
 		Messages: []Message{
 			{
