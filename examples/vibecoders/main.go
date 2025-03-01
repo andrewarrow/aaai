@@ -5,9 +5,11 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"html/template"
+	"io"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v4/middleware" 
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -18,6 +20,24 @@ type Task struct {
 	Completed bool      `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+// Template renderer
+type TemplateRenderer struct {
+	templates *template.Template
+}
+
+// Implement echo.Renderer interface
+func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c echo.Context) error {
+	return t.templates.ExecuteTemplate(w, name, data)
+}
+
+// Initialize templates
+func initTemplates() *TemplateRenderer {
+	return &TemplateRenderer{
+		templates: template.Must(template.ParseGlob("templates/*.html")),
+	}
+}
+
 
 var db *sql.DB
 
@@ -51,6 +71,10 @@ func main() {
 	// Create a new Echo instance
 	e := echo.New()
 
+	// Set renderer
+	renderer := initTemplates()
+	e.Renderer = renderer
+
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
@@ -69,23 +93,11 @@ func main() {
 
 // Handler for the welcome page
 func welcomePage(c echo.Context) error {
-	welcomeHTML := `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Task Manager API</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #333; }
-    </style>
-</head>
-<body>
-    <h1>Welcome to the Task Manager API</h1>
-    <p>Use the /tasks endpoint to manage your tasks.</p>
-</body>
-</html>`
-	return c.HTML(http.StatusOK, welcomeHTML)
+	return c.Render(http.StatusOK, "welcome.html", nil)
+
 }
+
+// Handler to get all tasks
 
 // Handler to get all tasks
 func getTasks(c echo.Context) error {

@@ -23,12 +23,6 @@ func ApplyPatch(fileOrig, fileDiff string) {
 		fmt.Printf("Error reading %s: %v\n", fileDiff, err)
 		os.Exit(1)
 	}
-	
-	// Special case - if original file is empty and diff adds new content
-	if len(linesOrig) == 0 && len(linesDiff) > 0 {
-		handleNewFile(fileOrig, linesDiff)
-		return
-	}
 
 	// Parse unified diff into hunks
 	hunks := parseHunks(linesDiff)
@@ -42,24 +36,6 @@ func ApplyPatch(fileOrig, fileDiff string) {
 		fmt.Printf("Error writing to %s: %v\n", fileOrig, err)
 		os.Exit(1)
 	}
-}
-
-func handleNewFile(filename string, diffLines []string) {
-	var newLines []string
-	for _, line := range diffLines {
-		// Skip diff metadata lines
-		if strings.HasPrefix(line, "---") || 
-		   strings.HasPrefix(line, "+++") ||
-		   strings.HasPrefix(line, "@@") {
-			continue  
-		}
-		// Only include added lines, removing the + prefix
-		if strings.HasPrefix(line, "+") {
-			newLine := strings.TrimPrefix(line, "+")
-			newLines = append(newLines, newLine)
-		}
-	}
-	writeLines(filename, newLines)
 }
 
 type Hunk struct {
@@ -113,6 +89,14 @@ func parseHunks(diffLines []string) []Hunk {
 }
 
 func findHunkPosition(lines []string, hunk Hunk) int {
+	if hunk.Length == 0 {
+		pos := hunk.StartLine + 1
+		if pos >= 0 && pos <= len(lines) {
+			return pos
+		}
+		return -1
+	}
+
 	var contextLines []string
 	for _, line := range hunk.Lines {
 		trimmedLine := strings.TrimRight(line, "\n")
@@ -145,7 +129,7 @@ func findHunkPosition(lines []string, hunk Hunk) int {
 		}
 	}
 
-	// Search around the hunk's expected start line (0-based)
+	// Search around the hunk's expected start line
 	startSearch := hunk.StartLine - 3
 	if startSearch < 0 {
 		startSearch = 0
@@ -223,8 +207,7 @@ func applyHunks(original []string, hunks []Hunk) []string {
 			}
 		}
 
-		// Combine the parts ensuring no duplicate newlines
-		// Rebuild the result
+		// Combine the parts
 		result = append(before, append(newLines, after...)...)
 	}
 
@@ -289,7 +272,6 @@ func readLines(filename string) ([]string, error) {
 }
 
 func writeLines(filename string, lines []string) error {
-
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil && !os.IsExist(err) {
 		if os.IsPermission(err) {
