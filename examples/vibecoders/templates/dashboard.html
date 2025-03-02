@@ -4,10 +4,160 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .AppName }} - {{ .PageTitle }}</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/profile.css">
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-5">
+    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg">
+        <!-- Navigation Bar -->
+        <div class="flex justify-between items-center pb-4 mb-6 border-b border-gray-700">
+            <a href="/" class="text-2xl font-bold text-purple-400">{{ .AppName }}</a>
+            
+            <!-- Buttons when logged out -->
+            <div id="navbar-logged-out" class="flex gap-3">
+                <button id="login-button-nav" class="px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Login</button>
+                <button id="register-button-nav" class="px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Create Account</button>
+            </div>
+            
+            <!-- User info when logged in -->
+            <div id="navbar-logged-in" class="flex gap-3" style="display: none;">
+                <div id="user-logged-in" style="display: none;">
+                    <p class="flex items-center gap-3">Logged in as <span id="logged-username" class="font-medium"></span>
+                    <button id="logout-button" class="px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Logout</button></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Message Container for Notifications -->
+        <div id="message-container" class="py-2 px-4 rounded-md mb-4"></div>
+
+        <!-- Splash Page Content (when not logged in) -->
+        <div id="splash-content" class="flex flex-col items-center justify-center py-10 text-center">
+            <h2 class="text-4xl mb-3 text-purple-400 font-bold">Welcome to {{ .AppName }}</h2>
+            <p class="text-xl mb-10 text-gray-400 max-w-2xl">Hire a 100x software vibe coder.</p>
+            <div class="flex items-center gap-5 bg-gray-700 p-5 rounded-xl mb-6 w-full max-w-lg shadow-md">
+                <img src="https://avatars.githubusercontent.com/u/127054?v=4" class="w-24 h-24 rounded-full border-3 border-purple-500 object-cover" alt="Profile picture"/>
+                <div class="flex flex-col items-start gap-3">
+                    <span class="text-lg text-gray-200">by Andrew Arrow</span>
+                    <div class="flex gap-4">
+                        <a href="https://www.linkedin.com/in/andrewarrow/" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" class="w-5 h-5">
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/andrewarrow" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="w-5 h-5">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 bg-gray-700 p-5 rounded-xl mb-6 w-full max-w-lg shadow-md">
+                <img src="https://i.imgur.com/HQs9d76.png" class="w-24 h-24 rounded-full border-3 border-purple-500 object-cover" alt="Profile picture"/>
+                <div class="flex flex-col items-start gap-3">
+                    <span class="text-lg text-gray-200">Your name here</span>
+                    <div class="flex gap-4">
+                        <a href="https://www.linkedin.com/in/andrewarrow/" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" class="w-5 h-5">
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/andrewarrow" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="w-5 h-5">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="flex items-center gap-5 bg-gray-700 p-5 rounded-xl mb-6 w-full max-w-lg shadow-md">
+                <img src="https://i.imgur.com/ANgLsc6.jpeg" class="w-24 h-24 rounded-full border-3 border-purple-500 object-cover" alt="Profile picture"/>
+                <div class="flex flex-col items-start gap-3">
+                    <span class="text-lg text-gray-200">Your name here</span>
+                    <div class="flex gap-4">
+                        <a href="https://www.linkedin.com/in/andrewarrow/" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" alt="LinkedIn" class="w-5 h-5">
+                            LinkedIn
+                        </a>
+                        <a href="https://github.com/andrewarrow" class="flex items-center gap-2 text-purple-400 font-bold hover:text-purple-300 transition" target="_blank">
+                            <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="w-5 h-5">
+                            GitHub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="login-form-container" class="bg-gray-700 p-6 rounded-lg mx-auto max-w-md my-8" style="display: none;">
+        <!-- Login Form Modal (initially hidden) -->
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="username" class="block mb-1 text-purple-400">Username:</label>
+                    <input type="text" id="username" name="username" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="block mb-1 text-purple-400">Password:</label>
+                    <input type="password" id="password" name="password" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="submit" id="login-button" class="px-4 py-2 bg-purple-500 text-gray-900 rounded hover:bg-purple-400 transition">Login</button>
+                    <button type="button" id="register-toggle" class="px-4 py-2 bg-purple-500 text-gray-900 rounded hover:bg-purple-400 transition">Create Account</button>
+                </div>
+            </form>
+        </div>
+                
+        <!-- Register Form Modal (initially hidden) -->
+        <div id="register-form-container" class="bg-gray-700 p-6 rounded-lg mx-auto max-w-md my-8" style="display: none;">
+            <form id="register-form">
+                <div class="mb-4">
+                    <label for="reg-username" class="block mb-1 text-purple-400">Username:</label>
+                    <input type="text" id="reg-username" name="username" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="reg-password" class="block mb-1 text-purple-400">Password:</label>
+                    <input type="password" id="reg-password" name="password" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                </div>
+                <div class="mb-4">
+                    <label for="confirm-password" class="block mb-1 text-purple-400">Confirm Password:</label>
+                    <input type="password" id="confirm-password" name="confirm-password" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                </div>
+                <div class="flex justify-between mt-6">
+                    <button type="submit" id="register-button" class="px-4 py-2 bg-purple-500 text-gray-900 rounded hover:bg-purple-400 transition">Register</button>
+                    <button type="button" id="login-toggle" class="px-4 py-2 bg-purple-500 text-gray-900 rounded hover:bg-purple-400 transition">Back to Login</button>
+                </div>
+            </form>
+        </div>
+                
+        <!-- Dashboard Content (when logged in) -->
+        <div id="task-info" class="text-center my-6" style="display: none;">
+            <p class="text-lg">You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}. 
+                Let's get organized!{{ else }}. Time to add some tasks!{{ end }}
+            </p>
+        </div>
+                
+        <div id="task-container" style="display: none;">
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="new-task" placeholder="Add a new task..." class="flex-1 p-3 border border-gray-600 bg-gray-800 text-gray-200 rounded-md">
+                <button id="add-task" class="px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Add Task</button>
+            </div>
+            
+            {{ if gt .TaskCount 0 }}
+                <ul class="list-none p-0">
+                    {{ range .Tasks }}
+                    <li class="p-3 border-b border-gray-700 flex items-center transition hover:bg-gray-700 {{ if .Completed }}bg-green-900/20{{ end }} last:border-b-0 rounded-md mb-2">
+                        <input type="checkbox" class="mr-3" {{ if .Completed }}checked{{ end }}>
+                        <span class="flex-grow">{{ .Title }}</span>
+                        <span class="text-gray-400 text-sm">
+                            Created: {{ .CreatedAt.Format "Jan 2, 2006 at 3:04 PM" }}
+                        </span>
+                    </li>
+                    {{ end }}
+                </ul>
+            {{ else }}
+                <div class="text-center py-6 bg-gray-700 text-gray-400 rounded-lg">No tasks yet. Create your first task to get started.</div>
+            {{ end }}
+        </div>
+    </div>
+    <script src="/static/auth.js"></script>
+    <script src="/static/tasks.js"></script>
+</body>
+</html>
     <div class="container">
         <!-- Navigation Bar -->
         <div class="navbar">
