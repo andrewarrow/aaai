@@ -8,6 +8,9 @@
     background-color: #2d2d2d;
     border-radius: 10px;
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
 }
 .profile-image {
     width: 120px;
@@ -15,19 +18,24 @@
     border-radius: 50%;
     border: 3px solid #bb86fc;
     object-fit: cover;
+    flex-shrink: 0;
 }
 .profile-links {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    width: 100%;
+    overflow-wrap: break-word;
 }
 .profile-name {
     font-size: 1.2rem;
     color: #e0e0e0;
+    overflow-wrap: break-word;
 }
 .social-links {
     display: flex;
     gap: 15px;
+    flex-wrap: wrap;
 }
 .social-link {
     display: flex;
@@ -36,8 +44,43 @@
     color: #bb86fc;
     text-decoration: none;
     font-weight: bold;
+    max-width: 100%;
+    overflow-wrap: break-word;
 }
 .social-icon {
     width: 24px;
     height: 24px;
+    flex-shrink: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-section {
+        flex-direction: column;
+        padding: 12px;
+    }
+    
+    .profile-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .profile-links {
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .social-links {
+        justify-content: center;
+    }
+    
+    .social-link {
+        font-size: 0.9rem;
+    }
+    
+    .social-icon {
+        width: 20px;
+        height: 20px;
+    }
 }

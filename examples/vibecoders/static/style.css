@@ -356,29 +356,49 @@ button:hover {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+  body {
+    padding: 10px;
+  }
+  
+  .container {
+    padding: 0 10px;
+  }
+  
   .navbar {
     flex-direction: column;
     gap: 10px;
     padding: 1rem;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  .brand {
+    margin-bottom: 10px;
   }
 
   .profile-section {
     flex-direction: column;
     text-align: center;
     padding: 15px 10px;
+    width: 100%;
+    overflow-x: hidden;
   }
 
   .profile-links {
     text-align: center;
+    width: 100%;
   }
 
   .social-links {
     justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
   }
 
   .splash-subtitle {
     font-size: 1.2rem;
     margin-bottom: 1.5rem;
+    max-width: 100%;
   }
 
   .profile-image {
@@ -389,6 +409,17 @@ button:hover {
 
 /* Small mobile devices */
 @media (max-width: 480px) {
+  body {
+    padding: 8px;
+  }
+  
+  .container {
+    padding: 10px;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+  
   .nav-buttons {
     flex-direction: column;
     width: 100%;
@@ -397,6 +428,15 @@ button:hover {
 
   .nav-button {
     width: 100%;
+  }
+  
+  .social-link {
+    font-size: 0.9rem;
+  }
+  
+  .social-icon {
+    width: 18px;
+    height: 18px;
   }
 
   .form-actions {
@@ -413,6 +453,17 @@ button:hover {
   }
 
   .task-form button {
+    width: 100%;
+  }
+  
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .task-meta {
+    margin-left: 0;
     width: 100%;
   }
 }
