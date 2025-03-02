@@ -24,7 +24,9 @@
             <div id="navbar-logged-in" class="nav-buttons flex gap-3" style="display: none;">
                 <div id="user-logged-in" style="display: none;">
                     <p class="flex flex-wrap items-center gap-3">Logged in as <span id="logged-username" class="font-medium"></span>
-                    <button id="logout-button" class="nav-button px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Logout</button></p>
+                    <form action="/logout" method="POST" class="inline">
+                        <button type="submit" class="nav-button px-4 py-2 bg-purple-500 text-gray-900 rounded-md hover:bg-purple-400 transition">Logout</button>
+                    </form></p>
                 </div>
             </div>
         </div>

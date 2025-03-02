@@ -90,24 +90,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle logout button click
-    if (logoutButton) {
-        logoutButton.addEventListener('click', function() {
-            // Call logout API to invalidate session
-            fetch('/api/logout', {
-                method: 'POST',
-                credentials: 'include' // Include cookies in the request
-            })
-            .then(() => {
-                updateUIAfterLogout();
-            })
-            .catch(error => {
-                console.error('Logout error:', error);
-                // Still perform client-side logout even if server request fails
-                updateUIAfterLogout();
-            });
-        });
-    }
+    // Logout is now handled via form POST to /logout
 
     // Helper function to display messages
     function showMessage(message, type) {

@@ -165,6 +165,7 @@ func main() {
 	e.POST("/api/register", registerUser)
 	e.POST("/api/login", loginUser)
 	e.POST("/api/logout", logoutUser)
+	e.POST("/logout", handleLogout)
 	e.GET("/api/user", getCurrentUser)
 
 	// Setup static file serving
@@ -242,4 +243,26 @@ func getTasks(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, tasks)
+}
+
+// Handler for the POST /logout form submission
+func handleLogout(c echo.Context) error {
+	// Get the session cookie
+	cookie, err := c.Cookie("auth_session")
+	if err == nil {
+		// Delete the session from the database
+		_, err = db.Exec("DELETE FROM auth_sessions WHERE uuid = ?", cookie.Value)
+		if err != nil {
+			log.Printf("Failed to delete session: %v", err)
+		}
+
+		// Expire the cookie
+		cookie.Value = ""
+		cookie.Path = "/"
+		cookie.Expires = time.Now().Add(-1 * time.Hour) // Expire the cookie
+		c.SetCookie(cookie)
+	}
+
+	// Redirect to the home page
+	return c.Redirect(http.StatusSeeOther, "/")
 }
