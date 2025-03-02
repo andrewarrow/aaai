@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loginButton = document.getElementById('login-button-nav');
     const registerButton = document.getElementById('register-button-nav');
     
-    // Check if user is already logged in (from localStorage)
+    // Check if user is already logged in (via server session API)
     checkLoginStatus();
 
     // Handle login form submission
@@ -33,15 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 username: username,
                 password: password
-            })
+            }),
+            credentials: 'include' // Include cookies in the request
         })
         .then(response => response.json())
         .then(data => {
             if (data.error) {
                 showMessage(data.error, 'error');
             } else {
-                // Store user info in localStorage
-                localStorage.setItem('user', JSON.stringify(data.user));
                 showMessage('Login successful!', 'success');
                 // Redirect to dashboard after successful login
                 window.location.href = '/';
@@ -90,17 +89,25 @@ document.addEventListener('DOMContentLoaded', function() {
             showMessage('An error occurred during registration: ' + error, 'error');
         });
     });
-
-    // Handle logout
+    
+    // Handle logout button click
     if (logoutButton) {
         logoutButton.addEventListener('click', function() {
-            localStorage.removeItem('user');
-            updateUIAfterLogout();
-            showMessage('Logged out successfully', 'success');
+            // Call logout API to invalidate session
+            fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include' // Include cookies in the request
+            })
+            .then(() => {
+                updateUIAfterLogout();
+            })
+            .catch(error => {
+                console.error('Logout error:', error);
+                // Still perform client-side logout even if server request fails
+                updateUIAfterLogout();
+            });
         });
     }
-
-    // Helper functions to display messages
 
     // Helper function to display messages
     function showMessage(message, type) {
@@ -141,21 +148,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Check if user is already logged in
+    // Check if user is already logged in using session API
     function checkLoginStatus() {
-        const user = JSON.parse(localStorage.getItem('user'));
-        const currentPath = window.location.pathname;
-        
-        if (user) {
-            updateUIAfterLogin(user.username);
-            
-            // If user is logged in and tries to access login/register pages, redirect to home
-            if (currentPath === '/login' || currentPath === '/register') {
-                window.location.href = '/';
+        fetch('/api/user', {
+            method: 'GET',
+            credentials: 'include' // Include cookies in the request
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Not authenticated');
             }
-        } else {
-            // If user is not logged in and tries to access protected pages, redirect to login
-            // No protected pages yet, but can be added when needed
-        }
+            return response.json();
+        })
+        .then(data => {
+            if (data.authenticated) {
+                updateUIAfterLogin(data.username);
+                
+                // If user is logged in and tries to access login/register pages, redirect to home
+                const currentPath = window.location.pathname;
+                if (currentPath === '/login' || currentPath === '/register') {
+                    window.location.href = '/';
+                }
+            }
+        })
+        .catch(error => {
+            // User is not authenticated, no action needed
+            console.log('Not authenticated:', error);
+        });
     }
 });

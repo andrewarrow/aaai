@@ -5,10 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const taskList = document.querySelector('.task-list');
     const emptyList = document.querySelector('.empty-list');
 
-    // Only enable task functionality if user is logged in
-    if (localStorage.getItem('user')) {
-        loadTasks();
-    }
+    // Check if user is logged in via session API
+    checkUserAuthenticated();
 
     // Add task event
     if (addTaskButton) {
@@ -42,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function() {
             body: JSON.stringify({
                 title: title,
                 completed: false
-            })
+            }),
+            credentials: 'include' // Include cookies in the request
         })
         .then(response => response.json())
         .then(task => {
@@ -62,7 +61,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Load tasks from server
     function loadTasks() {
-        fetch('/tasks')
+        fetch('/tasks', {
+            credentials: 'include' // Include cookies in the request
+        })
             .then(response => response.json())
             .then(tasks => {
                 if (tasks.length > 0 && taskList) {
@@ -123,10 +124,33 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify({
                 completed: completed
-            })
+            }),
+            credentials: 'include' // Include cookies in the request
         })
         .catch(error => {
             console.error('Error updating task:', error);
+        });
+    }
+    
+    // Check if user is authenticated
+    function checkUserAuthenticated() {
+        fetch('/api/user', {
+            method: 'GET',
+            credentials: 'include' // Include cookies in the request
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Not authenticated');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.authenticated) {
+                loadTasks();
+            }
+        })
+        .catch(error => {
+            console.log('User not authenticated:', error);
         });
     }
 });

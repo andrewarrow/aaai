@@ -2,9 +2,11 @@ package main
 
 import (
 	"net/http"
-	"golang.org/x/crypto/bcrypt"
 	"strconv"
 	"time"
+
+	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/labstack/echo/v4"
 )
@@ -126,10 +128,9 @@ func loginUser(c echo.Context) error {
 	}
 
 	// Check if user exists in DB and password matches
-	// This is simplified - in a real app, you would use sessions/JWTs
 	var user User
 	var hashedPassword string
-	err := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?", 
+	err := db.QueryRow("SELECT id, username, password FROM users WHERE username = ?",
 		credentials.Username).Scan(&user.ID, &user.Username, &hashedPassword)
 
 	if err != nil {
@@ -142,11 +143,84 @@ func loginUser(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
 	}
 
+	// Generate a new session UUID
+	sessionID := uuid.New().String()
+
+	// Store the session in the database
+	_, err = db.Exec("INSERT INTO auth_sessions (uuid, user_id) VALUES (?, ?)",
+		sessionID, user.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create session"})
+	}
+
+	// Set the session cookie
+	cookie := new(http.Cookie)
+	cookie.Name = "auth_session"
+	cookie.Value = sessionID
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	// In production, you'd want to set cookie.Secure = true and use HTTPS
+	c.SetCookie(cookie)
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "Login successful",
 		"user": map[string]interface{}{
-			"id": user.ID,
+			"id":       user.ID,
 			"username": user.Username,
 		},
+	})
+}
+
+// Handler to logout user
+func logoutUser(c echo.Context) error {
+	// Get the session cookie
+	cookie, err := c.Cookie("auth_session")
+	if err == nil {
+		// Delete the session from the database
+		_, err = db.Exec("DELETE FROM auth_sessions WHERE uuid = ?", cookie.Value)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to delete session"})
+		}
+
+		// Expire the cookie
+		cookie.Value = ""
+		cookie.Path = "/"
+		cookie.Expires = time.Now().Add(-1 * time.Hour) // Expire the cookie
+		c.SetCookie(cookie)
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "Logged out successfully"})
+}
+
+// Handler to get current user information
+func getCurrentUser(c echo.Context) error {
+	// Get the session cookie
+	cookie, err := c.Cookie("auth_session")
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"authenticated": false,
+		})
+	}
+
+	// Look up the session in the database
+	var userID int
+	var username string
+	err = db.QueryRow(`
+		SELECT u.id, u.username
+		FROM auth_sessions a
+		JOIN users u ON a.user_id = u.id
+		WHERE a.uuid = ?
+	`, cookie.Value).Scan(&userID, &username)
+
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"authenticated": false,
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"authenticated": true,
+		"id":            userID,
+		"username":      username,
 	})
 }

@@ -83,12 +83,28 @@ func initDB() {
 	createUsersTableSQL := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT UNIQUE NOT NULL,
+		username TEXT NOT NULL,
 		password TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);`
+	);
+	CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+	`
+
+	createAuthSessionsTableSQL := `
+	CREATE TABLE IF NOT EXISTS auth_sessions (
+		uuid TEXT PRIMARY KEY,
+		user_id INTEGER NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY (user_id) REFERENCES users(id)
+	);
+	CREATE INDEX IF NOT EXISTS idx_auth_sessions_uuid ON auth_sessions(uuid);
+	`
 
 	_, err = db.Exec(createUsersTableSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, err = db.Exec(createAuthSessionsTableSQL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -148,6 +164,8 @@ func main() {
 	// User API Routes
 	e.POST("/api/register", registerUser)
 	e.POST("/api/login", loginUser)
+	e.POST("/api/logout", logoutUser)
+	e.GET("/api/user", getCurrentUser)
 
 	// Setup static file serving
 	setupStaticFiles(e)
