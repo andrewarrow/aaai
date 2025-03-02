@@ -21,24 +21,24 @@ var staticContent embed.FS
 func main() {
 	// Initialize database connection
 	// Database is expected to be migrated using Flyway before server startup
-	dbPath := "./db/vibecoders.db"
-	
+	dbPath := "./vibecoders.db"
+
 	// Check if database exists
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
 		log.Fatalf("Database %s not found. Please run migrations first with: npm run db:migrate", dbPath)
 	}
-	
+
 	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-	
+
 	// Verify database connection
 	if err := db.Ping(); err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	
+
 	log.Println("Successfully connected to database")
 
 	// Initialize Echo
