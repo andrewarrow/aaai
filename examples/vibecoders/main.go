@@ -174,9 +174,9 @@ func dashboard(c echo.Context) error {
 	}
 
 	data := map[string]interface{}{
-		"PageTitle": "Task Manager",
+		"PageTitle": "andrewarrow.dev",
 		"Tasks":     tasks,
-		"AppName":   "TaskMaster",
+		"AppName":   "vibecoders",
 		"TaskCount": len(tasks),
 	}
 	return c.Render(http.StatusOK, "dashboard.html", data)
