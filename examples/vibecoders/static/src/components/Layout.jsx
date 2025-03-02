@@ -25,6 +25,9 @@ const Layout = () => {
               user ? (
                 <>
                   <Link to="/profile" className="text-gray-300 hover:text-white px-3 py-2 rounded-md">Profile</Link>
+                  {user.is_admin && (
+                    <Link to="/admin" className="text-yellow-400 hover:text-yellow-300 px-3 py-2 rounded-md">Admin</Link>
+                  )}
                   <button 
                     onClick={handleLogout} 
                     className="text-gray-300 hover:text-white px-3 py-2 rounded-md"

@@ -64,17 +64,35 @@ func main() {
 	api.GET("/homepage-users", handlers.GetHomepageUsers(db))
 	api.GET("/user", handlers.GetCurrentUser(db))
 
+	// Admin API routes with admin middleware
+	adminMiddleware := handlers.IsAdmin(db)
+	admin := api.Group("/admin", adminMiddleware)
+	admin.GET("/users", handlers.GetAllUsers(db))
+	admin.GET("/users/:id", handlers.GetUserByID(db))
+	admin.PUT("/users/:id", handlers.UpdateUserAsAdmin(db))
+	admin.DELETE("/users/:id", handlers.DeleteUser(db))
+
 	assetHandler := http.FileServer(http.FS(staticFS))
 
-	e.GET("/", func(c echo.Context) error {
+	// Function to serve the SPA index.html for any frontend routes
+	serveSPA := func(c echo.Context) error {
 		indexHTML, err := fs.ReadFile(staticFS, "index.html")
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Error reading index.html")
 		}
 
 		return c.Blob(http.StatusOK, "text/html", indexHTML)
-	})
+	}
 
+	// Serve SPA routes
+	e.GET("/", serveSPA)
+	e.GET("/login", serveSPA)
+	e.GET("/register", serveSPA)
+	e.GET("/profile", serveSPA)
+	e.GET("/admin", serveSPA)
+	e.GET("/admin/*", serveSPA)
+
+	// Serve static assets
 	e.GET("/*", echo.WrapHandler(http.StripPrefix("/", assetHandler)))
 
 	// Start server

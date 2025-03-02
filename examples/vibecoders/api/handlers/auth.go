@@ -123,7 +123,7 @@ func Register(db *sql.DB) echo.HandlerFunc {
 		}
 
 		// Create user
-		err = models.CreateUser(db, req.Username, req.Password, req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
+		err = models.CreateUser(db, req.Username, req.Password, "", req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not create user"})
 		}
@@ -154,7 +154,7 @@ func UpdateUser(db *sql.DB) echo.HandlerFunc {
 		}
 
 		// Update user
-		err = models.UpdateUser(db, userID, req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
+		err = models.UpdateUser(db, userID, "", req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not update user"})
 		}

@@ -9,7 +9,10 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import Admin from './pages/Admin';
+import AdminEditUser from './pages/AdminEditUser';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -28,6 +31,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 </ProtectedRoute>
               } 
             />
+            
+            {/* Admin Routes */}
+            <Route path="admin" element={<AdminRoute />}>
+              <Route index element={<Admin />} />
+              <Route path="users/:id" element={<AdminEditUser />} />
+            </Route>
+            
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>
