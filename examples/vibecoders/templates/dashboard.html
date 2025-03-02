@@ -4,68 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .PageTitle }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .task-summary {
-            background-color: #f0f7ff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-        .task-list {
-            list-style: none;
-            padding: 0;
-        }
-        .task-item {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-        }
-        .task-item:last-child {
-            border-bottom: none;
-        }
-        .task-completed {
-            background-color: #f9fff9;
-        }
-        .task-checkbox {
-            margin-right: 10px;
-        }
-        .task-meta {
-            color: #888;
-            font-size: 0.8em;
-            margin-left: auto;
-        }
-        .empty-list {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>{{ .PageTitle }}</h1>
-        
         <div class="task-summary">
             <p>You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}. 
                Let's get organized!{{ else }}. Time to add some tasks!{{ end }}</p>

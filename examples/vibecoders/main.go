@@ -23,7 +23,7 @@ type Task struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-//go:embed templates/*.html
+//go:embed templates/*.html static/*.css
 var templateFS embed.FS
 
 
@@ -73,6 +73,24 @@ func initDB() {
 	}
 }
 
+// Setup static file server from embedded files
+func setupStaticFiles(e *echo.Echo) {
+	// Get the static files from embedded filesystem
+	staticFiles, err := fs.Sub(templateFS, "static")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Create a filesystem HTTP handler
+	fileServer := http.FileServer(http.FS(staticFiles))
+	
+	// Register the handler for the /static/ path
+	staticHandler := echo.WrapHandler(http.StripPrefix("/static/", fileServer))
+	e.GET("/static/*", staticHandler)
+}
+
+
+
 func main() {
 	// Initialize database
 	initDB()
@@ -88,6 +106,9 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
+		HTML5: true,
+	}))
 	e.Use(middleware.CORS())
 
 	// Routes
@@ -96,6 +117,9 @@ func main() {
 	e.POST("/tasks", createTask)
 	e.PUT("/tasks/:id", updateTask)
 	e.DELETE("/tasks/:id", deleteTask)
+
+	// Setup static file serving
+	setupStaticFiles(e)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
