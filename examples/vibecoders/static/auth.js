@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store user info in localStorage
                 localStorage.setItem('user', JSON.stringify(data.user));
                 showMessage('Login successful!', 'success');
-                updateUIAfterLogin(data.user.username);
+                // Redirect to dashboard instead of updating UI
+                window.location.href = '/dashboard';
+                // No need to call updateUIAfterLogin here as we're redirecting
+                // updateUIAfterLogin(data.user.username);
             }
         })
         .catch(error => {
@@ -104,8 +107,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Handle logout
     logoutButton.addEventListener('click', function() {
         localStorage.removeItem('user');
-        updateUIAfterLogout();
         showMessage('Logged out successfully', 'success');
+        // Redirect to homepage after logout
+        window.location.href = '/';
+        // updateUIAfterLogout(); // No need as we're redirecting
     });
 
     // Helper function to display messages
@@ -142,7 +147,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Check if user is already logged in
     function checkLoginStatus() {
         const user = JSON.parse(localStorage.getItem('user'));
-        if (user) {
+        
+        // Check if we're on the index page and logged in
+        if (user && window.location.pathname === '/') {
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+            return;
+        }
+        
+        // Check if we're on the dashboard page and not logged in
+        if (!user && window.location.pathname === '/dashboard') {
+            // Redirect to homepage
+            window.location.href = '/';
+            return;
+        }
+        if (user && window.location.pathname === '/dashboard') {
             updateUIAfterLogin(user.username);
         }
     }

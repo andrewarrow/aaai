@@ -132,6 +132,14 @@
             text-decoration: none;
             font-weight: 500;
         }
+
+        #message-container {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -143,9 +151,9 @@
             <a href="/">Option B</a>
             <a href="/">Option C</a>
         </div>
-        <a href="/" class="sign-in">
+        <a href="/dashboard" class="sign-in">
             Sign in
-        </a>
+        </a> 
     </nav>
 
     <main>
@@ -170,6 +178,10 @@
                 <a href="https://github.com/andrewarrow?tab=repositories" class="view-all">View</a>
             </div>
         </div>
+        
+        <div id="message-container"></div>
     </main>
+    
+    <script src="/static/auth.js"></script>
 </body>
 </html>
