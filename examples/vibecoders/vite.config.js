@@ -8,7 +8,9 @@ export default defineConfig({
   build: {
     outDir: resolve('./static/dist'),
     emptyOutDir: true,
+    assetsInlineLimit: 0,
   },
+  publicDir: resolve('./static/img'),
   server: {
     proxy: {
       '/api': 'http://localhost:3000',

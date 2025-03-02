@@ -54,6 +54,24 @@ const Layout = () => {
           <p className="text-center text-gray-400">
             &copy; {new Date().getFullYear()} VibeCoders. All rights reserved.
           </p>
+          <div className="flex justify-center space-x-12 mt-6">
+            <a href="https://aider.chat/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-400 hover:text-white">
+              <img src="/aider.png" alt="Aider" className="w-8 h-8 mb-2" />
+              <span>Aider</span>
+            </a>
+            <a href="https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-400 hover:text-white">
+              <img src="/claude.png" alt="Claude Code" className="w-8 h-8 mb-2" />
+              <span>Claude Code</span>
+            </a>
+            <a href="https://www.cursor.com/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-400 hover:text-white">
+              <img src="/cursor.svg" alt="Cursor" className="w-8 h-8 mb-2" />
+              <span>Cursor</span>
+            </a>
+            <a href="https://cline.bot/" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center text-gray-400 hover:text-white">
+              <img src="/cline.png" alt="Cline" className="w-8 h-8 mb-2" />
+              <span>Cline</span>
+            </a>
+          </div>
         </div>
       </footer>
     </div>
