@@ -110,7 +110,7 @@ func registerUser(c echo.Context) error {
 
 	// Insert user into database
 	_, err = db.Exec("INSERT INTO users (username, password) VALUES (?, ?)",
-		user.Username, hashedPassword)
+		user.Username, string(hashedPassword))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": "Failed to create user: " + err.Error(),
@@ -125,6 +125,13 @@ func loginUser(c echo.Context) error {
 	credentials := new(LoginCredentials)
 	if err := c.Bind(credentials); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+	}
+
+	// Validate credentials
+	if credentials.Username == "" || credentials.Password == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "Username and password are required",
+		})
 	}
 
 	// Check if user exists in DB and password matches

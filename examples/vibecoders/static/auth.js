@@ -18,77 +18,81 @@ document.addEventListener('DOMContentLoaded', function() {
     checkLoginStatus();
 
     // Handle login form submission
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        // Send login request
-        fetch('/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            }),
-            credentials: 'include' // Include cookies in the request
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showMessage(data.error, 'error');
-            } else {
-                showMessage('Login successful!', 'success');
-                // Redirect to dashboard after successful login
-                window.location.href = '/';
-            }
-        })
-        .catch(error => {
-            showMessage('An error occurred during login: ' + error, 'error');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // Send login request
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                }),
+                credentials: 'include' // Include cookies in the request
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showMessage(data.error, 'error');
+                } else {
+                    showMessage('Login successful!', 'success');
+                    // Redirect to dashboard after successful login
+                    window.location.href = '/';
+                }
+            })
+            .catch(error => {
+                showMessage('An error occurred during login: ' + error, 'error');
+            });
         });
-    });
+    }
 
     // Handle register form submission
-    registerForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('reg-username').value;
-        const password = document.getElementById('reg-password').value;
-        const confirmPassword = document.getElementById('confirm-password').value;
-        
-        if (password !== confirmPassword) {
-            showMessage('Passwords do not match', 'error');
-            return;
-        }
-        
-        // Send registration request
-        fetch('/api/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                showMessage(data.error, 'error');
-            } else {
-                showMessage('Registration successful! Please log in.', 'success');
-                // Redirect to login page after successful registration
-                window.location.href = '/login';
+    if (registerForm) {
+        registerForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            if (password !== confirmPassword) {
+                showMessage('Passwords do not match', 'error');
+                return;
             }
-        })
-        .catch(error => {
-            showMessage('An error occurred during registration: ' + error, 'error');
+            
+            // Send registration request
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    showMessage(data.error, 'error');
+                } else {
+                    showMessage('Registration successful! Please log in.', 'success');
+                    // Redirect to login page after successful registration
+                    window.location.href = '/login';
+                }
+            })
+            .catch(error => {
+                showMessage('An error occurred during registration: ' + error, 'error');
+            });
         });
-    });
+    }
     
     // Logout is now handled via form POST to /logout
 
@@ -152,11 +156,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (currentPath === '/login' || currentPath === '/register') {
                     window.location.href = '/';
                 }
+            } else {
+                // User is not authenticated
+                updateUIAfterLogout();
             }
         })
         .catch(error => {
-            // User is not authenticated, no action needed
+            // User is not authenticated, update UI
             console.log('Not authenticated:', error);
+            updateUIAfterLogout();
         });
     }
 });
