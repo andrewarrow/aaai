@@ -1,0 +1,43 @@
+.profile-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #2d2d2d;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+.profile-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 3px solid #bb86fc;
+    object-fit: cover;
+}
+.profile-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.profile-name {
+    font-size: 1.2rem;
+    color: #e0e0e0;
+}
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+.social-link {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #bb86fc;
+    text-decoration: none;
+    font-weight: bold;
+}
+.social-icon {
+    width: 24px;
+    height: 24px;
+}
