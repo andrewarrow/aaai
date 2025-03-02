@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"net/http"
 
+	"vibecoders/models"
+
 	"github.com/labstack/echo/v4"
-	"vibecoders.com/models"
 )
 
 type LoginRequest struct {
@@ -14,13 +15,13 @@ type LoginRequest struct {
 }
 
 type RegisterRequest struct {
-	Username     string `json:"username"`
-	Password     string `json:"password"`
+	Username        string `json:"username"`
+	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirm_password"`
-	Bio          string `json:"bio"`
-	LinkedInURL  string `json:"linked_in_url"`
-	GithubURL    string `json:"github_url"`
-	PhotoURL     string `json:"photo_url"`
+	Bio             string `json:"bio"`
+	LinkedInURL     string `json:"linked_in_url"`
+	GithubURL       string `json:"github_url"`
+	PhotoURL        string `json:"photo_url"`
 }
 
 type UpdateUserRequest struct {
@@ -67,7 +68,7 @@ func Login(db *sql.DB) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"message": "Login successful",
 			"user": map[string]interface{}{
-				"id": user.ID,
+				"id":       user.ID,
 				"username": user.Username,
 			},
 		})
