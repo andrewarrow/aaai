@@ -1,0 +1,25 @@
+{
+  "name": "vibecoders",
+  "version": "1.0.0",
+  "description": "Developer social network",
+  "main": "index.js",
+  "scripts": {
+    "build": "esbuild static/src/main.js --bundle --outfile=static/dist/bundle.js",
+    "watch": "esbuild static/src/main.js --bundle --outfile=static/dist/bundle.js --watch",
+    "build:css": "tailwindcss -i static/src/tailwind.css -o static/dist/style.css",
+    "watch:css": "tailwindcss -i static/src/tailwind.css -o static/dist/style.css --watch",
+    "dev": "concurrently \"npm run watch\" \"npm run watch:css\""
+  },
+  "keywords": [
+    "developers",
+    "social",
+    "network"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "esbuild": "^0.19.5",
+    "tailwindcss": "^3.3.5"
+  }
+}

@@ -1,4 +1,8 @@
-tasks.db
+vibecoders.db
+main
+dist
+node_modules
+package-lock.json
 go.sum
 vibecoders
 __pycache__
