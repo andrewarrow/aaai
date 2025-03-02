@@ -1,8 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const UserCard = ({ user }) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = (e) => {
+    // Don't navigate if clicking on a link
+    if (e.target.tagName.toLowerCase() === 'a' || 
+        e.target.parentElement.tagName.toLowerCase() === 'a') {
+      return;
+    }
+    navigate(`/users/${user.username}`);
+  };
+
   return (
-    <div className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform transition-transform hover:scale-105">
+    <div 
+      className="bg-gray-800 rounded-lg overflow-hidden shadow-lg transform transition-transform hover:scale-105 cursor-pointer"
+      onClick={handleCardClick}
+    >
       <div className="p-6 flex flex-col items-center">
         <img 
           src={user.photo_url} 

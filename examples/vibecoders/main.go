@@ -63,6 +63,7 @@ func main() {
 	api.PATCH("/user", handlers.UpdateUser(db))
 	api.GET("/homepage-users", handlers.GetHomepageUsers(db))
 	api.GET("/user", handlers.GetCurrentUser(db))
+	api.GET("/users/:username", handlers.GetPublicUserByUsername(db))
 
 	// Admin API routes with admin middleware
 	adminMiddleware := handlers.IsAdmin(db)
@@ -89,6 +90,7 @@ func main() {
 	e.GET("/login", serveSPA)
 	e.GET("/register", serveSPA)
 	e.GET("/profile", serveSPA)
+	e.GET("/users/:username", serveSPA)
 	e.GET("/admin", serveSPA)
 	e.GET("/admin/*", serveSPA)
 

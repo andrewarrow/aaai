@@ -197,3 +197,25 @@ func GetCurrentUser(db *sql.DB) echo.HandlerFunc {
 		return c.JSON(http.StatusOK, user)
 	}
 }
+
+func GetPublicUserByUsername(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		username := c.Param("username")
+		if username == "" {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Username is required"})
+		}
+
+		user, err := models.GetUserByUsername(db, username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+			}
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not fetch user"})
+		}
+
+		// Remove sensitive information for public profile
+		user.Password = ""
+		
+		return c.JSON(http.StatusOK, user)
+	}
+}

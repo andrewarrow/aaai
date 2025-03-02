@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
+import UserProfile from './pages/UserProfile';
 import Admin from './pages/Admin';
 import AdminEditUser from './pages/AdminEditUser';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -31,6 +32,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                 </ProtectedRoute>
               } 
             />
+            <Route path="users/:username" element={<UserProfile />} />
             
             {/* Admin Routes */}
             <Route path="admin" element={<AdminRoute />}>
