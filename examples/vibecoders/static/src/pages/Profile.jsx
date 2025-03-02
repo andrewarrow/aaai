@@ -336,14 +336,13 @@ const Profile = () => {
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   };
 
-  // Generate a more subtle background gradient based on prompt ID
   const getPromptBackground = (id) => {
     const backgrounds = [
-      "bg-gradient-to-r from-purple-500/70 to-indigo-500/70",
-      "bg-gradient-to-r from-pink-400/70 to-purple-500/70",
-      "bg-gradient-to-r from-teal-400/70 to-blue-400/70",
-      "bg-gradient-to-r from-amber-400/70 to-orange-400/70",
-      "bg-gradient-to-r from-emerald-400/70 to-teal-400/70"
+      "bg-purple-800",
+      "bg-indigo-800",
+      "bg-blue-800",
+      "bg-teal-800",
+      "bg-emerald-800"
     ];
     return backgrounds[id % backgrounds.length];
   };

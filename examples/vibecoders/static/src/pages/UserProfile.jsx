@@ -95,14 +95,13 @@ const UserProfile = () => {
     }
   };
 
-  // Generate a more subtle background gradient based on prompt ID
   const getPromptBackground = (id) => {
     const backgrounds = [
-      "bg-gradient-to-r from-purple-500/70 to-indigo-500/70",
-      "bg-gradient-to-r from-pink-400/70 to-purple-500/70",
-      "bg-gradient-to-r from-teal-400/70 to-blue-400/70",
-      "bg-gradient-to-r from-amber-400/70 to-orange-400/70",
-      "bg-gradient-to-r from-emerald-400/70 to-teal-400/70"
+      "bg-purple-800",
+      "bg-indigo-800",
+      "bg-blue-800",
+      "bg-teal-800",
+      "bg-emerald-800"
     ];
     return backgrounds[id % backgrounds.length];
   };
@@ -149,43 +148,6 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* Latest Prompts Section */}
-      {/* Latest Prompts Section */}
-      <div className="mb-10">
-        <h2 className="text-2xl font-bold text-purple-500 mb-6">Latest Prompts</h2>
-        
-        {prompts.length > 0 ? (
-          <div className="space-y-6">
-            {prompts.map(prompt => (
-              <div 
-                key={prompt.id} 
-                className={`rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-102 ${getPromptBackground(prompt.id)}`}
-              >
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-white mb-3">{prompt.title}</h3>
-                  <p className="text-gray-100 mb-4">{prompt.content}</p>
-                  
-                  <div className="flex flex-wrap justify-between items-center">
-                    <div className="flex flex-wrap gap-2 mb-2 md:mb-0">
-                      {prompt.tags.map(tag => (
-                        <span 
-                          key={tag} 
-                          className="bg-black bg-opacity-30 text-white px-3 py-1 rounded-full text-sm"
-                        >
-                          #{tag}
-                        </span>
-                      ))}
-                    </div>
-                    <span className="text-gray-200 text-sm">{formatDate(prompt.created_at)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="text-gray-400 text-center py-8">No prompts to display</p>
-        )}
-      </div>
       
       {/* Projects Section */}
       {projects.length > 0 && (
@@ -247,6 +209,43 @@ const UserProfile = () => {
           </div>
         </div>
       )}
+      {/* Latest Prompts Section */}
+      {/* Latest Prompts Section */}
+      <div className="mb-10">
+        <h2 className="text-2xl font-bold text-purple-500 mb-6">Latest Prompts</h2>
+        
+        {prompts.length > 0 ? (
+          <div className="space-y-6">
+            {prompts.map(prompt => (
+              <div 
+                key={prompt.id} 
+                className={`rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-102 ${getPromptBackground(prompt.id)}`}
+              >
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-3">{prompt.title}</h3>
+                  <p className="text-gray-100 mb-4">{prompt.content}</p>
+                  
+                  <div className="flex flex-wrap justify-between items-center">
+                    <div className="flex flex-wrap gap-2 mb-2 md:mb-0">
+                      {prompt.tags.map(tag => (
+                        <span 
+                          key={tag} 
+                          className="bg-black bg-opacity-30 text-white px-3 py-1 rounded-full text-sm"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-gray-200 text-sm">{formatDate(prompt.created_at)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-center py-8">No prompts to display</p>
+        )}
+      </div>
     </div>
   );
 };
