@@ -2,10 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM Elements
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
-    const loginFormContainer = document.getElementById('login-form-container');
-    const registerFormContainer = document.getElementById('register-form-container');
-    const registerToggle = document.getElementById('register-toggle');
-    const loginToggle = document.getElementById('login-toggle');
     const logoutButton = document.getElementById('logout-button');
     const userLoggedIn = document.getElementById('user-logged-in');
     const loggedUsername = document.getElementById('logged-username');
@@ -20,25 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Check if user is already logged in (from localStorage)
     checkLoginStatus();
-
-    // Toggle between login and register forms
-    registerToggle.addEventListener('click', function() {
-        loginFormContainer.style.display = 'none';
-        registerFormContainer.style.display = 'block';
-    });
-
-    loginToggle.addEventListener('click', function() {
-        registerFormContainer.style.display = 'none';
-        loginFormContainer.style.display = 'block';
-    });
-
-    // Open login/register forms from navbar buttons
-    if (loginButton) {
-        loginButton.addEventListener('click', () => loginFormContainer.style.display = 'block');
-    }
-    if (registerButton) {
-        registerButton.addEventListener('click', () => registerFormContainer.style.display = 'block');
-    }
 
     // Handle login form submission
     loginForm.addEventListener('submit', function(e) {
@@ -66,7 +43,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Store user info in localStorage
                 localStorage.setItem('user', JSON.stringify(data.user));
                 showMessage('Login successful!', 'success');
-                updateUIAfterLogin(data.user.username);
+                // Redirect to dashboard after successful login
+                window.location.href = '/';
             }
         })
         .catch(error => {
@@ -104,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 showMessage(data.error, 'error');
             } else {
                 showMessage('Registration successful! Please log in.', 'success');
-                registerFormContainer.style.display = 'none';
-                loginFormContainer.style.display = 'block';
+                // Redirect to login page after successful registration
+                window.location.href = '/login';
             }
         })
         .catch(error => {
@@ -114,22 +92,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Handle logout
-    logoutButton.addEventListener('click', function() {
-        localStorage.removeItem('user');
-        updateUIAfterLogout();
-        showMessage('Logged out successfully', 'success');
-    });
+    if (logoutButton) {
+        logoutButton.addEventListener('click', function() {
+            localStorage.removeItem('user');
+            updateUIAfterLogout();
+            showMessage('Logged out successfully', 'success');
+        });
+    }
 
-    // Close modal when clicking outside
-    window.addEventListener('click', function(event) {
-        if (event.target === loginFormContainer) {
-            loginFormContainer.style.display = 'none';
-        }
-        
-        if (event.target === registerFormContainer) {
-            registerFormContainer.style.display = 'none';
-        }
-    });
+    // Helper functions to display messages
 
     // Helper function to display messages
     function showMessage(message, type) {
@@ -144,35 +115,47 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update UI after successful login
     function updateUIAfterLogin(username) {
-        loginFormContainer.style.display = 'none';
-        registerFormContainer.style.display = 'none';
-        userLoggedIn.style.display = 'block';
-        navbarLoggedIn.style.display = 'block';
-        navbarLoggedOut.style.display = 'none';
-        loggedUsername.textContent = username;
+        if (userLoggedIn) userLoggedIn.style.display = 'block';
+        if (navbarLoggedIn) navbarLoggedIn.style.display = 'block';
+        if (navbarLoggedOut) navbarLoggedOut.style.display = 'none';
+        if (loggedUsername) loggedUsername.textContent = username;
         
         if (splashContent) {
             splashContent.style.display = 'none';
         }
-        taskContainer.style.display = 'block';
-        taskInfo.style.display = 'block';
+        if (taskContainer) taskContainer.style.display = 'block';
+        if (taskInfo) taskInfo.style.display = 'block';
     }
 
     // Update UI after logout
     function updateUIAfterLogout() {
-        navbarLoggedIn.style.display = 'none';
-        navbarLoggedOut.style.display = 'block';
-        userLoggedIn.style.display = 'none';
-        loginFormContainer.style.display = 'none';
+        if (navbarLoggedIn) navbarLoggedIn.style.display = 'none';
+        if (navbarLoggedOut) navbarLoggedOut.style.display = 'block';
+        if (userLoggedIn) userLoggedIn.style.display = 'none';
         if (splashContent) splashContent.style.display = 'block';
+        
+        // Redirect to home page if we're on a protected page
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/' && currentPath !== '/login' && currentPath !== '/register') {
+            window.location.href = '/';
+        }
     }
 
     // Check if user is already logged in
-    // Check if user is already logged in
     function checkLoginStatus() {
         const user = JSON.parse(localStorage.getItem('user'));
+        const currentPath = window.location.pathname;
+        
         if (user) {
             updateUIAfterLogin(user.username);
+            
+            // If user is logged in and tries to access login/register pages, redirect to home
+            if (currentPath === '/login' || currentPath === '/register') {
+                window.location.href = '/';
+            }
+        } else {
+            // If user is not logged in and tries to access protected pages, redirect to login
+            // No protected pages yet, but can be added when needed
         }
     }
 });

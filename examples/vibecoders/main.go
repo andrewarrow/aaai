@@ -136,6 +136,8 @@ func main() {
 
 	// Page Routes
 	e.GET("/", dashboard)
+	e.GET("/login", loginPage)
+	e.GET("/register", registerPage)
 
 	// Task API Routes
 	e.GET("/tasks", getTasks)
@@ -180,6 +182,24 @@ func dashboard(c echo.Context) error {
 		"TaskCount": len(tasks),
 	}
 	return c.Render(http.StatusOK, "dashboard.html", data)
+}
+
+// Handler for the login page
+func loginPage(c echo.Context) error {
+	data := map[string]interface{}{
+		"PageTitle": "Login",
+		"AppName":   "vibecoders",
+	}
+	return c.Render(http.StatusOK, "login.html", data)
+}
+
+// Handler for the register page
+func registerPage(c echo.Context) error {
+	data := map[string]interface{}{
+		"PageTitle": "Create Account",
+		"AppName":   "vibecoders",
+	}
+	return c.Render(http.StatusOK, "register.html", data)
 }
 
 // Handler to get all tasks

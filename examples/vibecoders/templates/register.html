@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>{{ .AppName }} - Create Account</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-gray-900 text-gray-200 min-h-screen p-5">
+    <div class="max-w-4xl mx-auto bg-gray-800 p-6 rounded-lg shadow-lg container">
+        <!-- Navigation Bar -->
+        <div class="navbar flex justify-between items-center pb-4 mb-6 border-b border-gray-700">
+            <a href="/" class="brand text-2xl font-bold text-purple-400">{{ .AppName }}</a>
+        </div>
+        
+        <!-- Message Container for Notifications -->
+        <div id="message-container" class="py-2 px-4 rounded-md mb-4"></div>
+
+        <div class="register-page">
+            <div class="bg-gray-700 p-6 rounded-lg mx-auto max-w-md my-8">
+                <h2 class="text-2xl text-purple-400 mb-6 text-center">Create an account</h2>
+                <form id="register-form">
+                    <div class="mb-4">
+                        <label for="reg-username" class="block mb-1 text-purple-400">Username:</label>
+                        <input type="text" id="reg-username" name="username" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="reg-password" class="block mb-1 text-purple-400">Password:</label>
+                        <input type="password" id="reg-password" name="password" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="confirm-password" class="block mb-1 text-purple-400">Confirm Password:</label>
+                        <input type="password" id="confirm-password" name="confirm-password" class="w-full p-2 border border-gray-600 bg-gray-800 text-gray-200 rounded" required>
+                    </div>
+                    <div class="flex justify-between mt-6">
+                        <button type="submit" id="register-button" class="px-4 py-2 bg-purple-500 text-gray-900 rounded hover:bg-purple-400 transition">Register</button>
+                        <a href="/login" class="px-4 py-2 bg-gray-600 text-gray-200 rounded hover:bg-gray-500 transition flex items-center">Back to Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto mt-8 py-6 border-t border-gray-700 text-gray-400 text-center">
+        <div class="flex flex-col items-center justify-center gap-2">
+            <p>© 2025 {{ .AppName }} - Hire 100x Software Vibe Coders</p>
+            <p class="text-sm">Made with ❤️ by the {{ .AppName }} team</p>
+            <p class="text-xs mt-2">Version 1.0.0</p>
+        </div>
+    </footer>
+    <script src="/static/auth.js"></script>
+</body>
+</html>
