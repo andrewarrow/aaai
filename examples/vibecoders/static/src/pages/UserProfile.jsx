@@ -4,23 +4,35 @@ import { useParams } from 'react-router-dom';
 const UserProfile = () => {
   const { username } = useParams();
   const [user, setUser] = useState(null);
+  const [prompts, setPrompts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/users/${username}`);
+        // Fetch user data
+        const userResponse = await fetch(`/api/users/${username}`);
         
-        if (!response.ok) {
-          if (response.status === 404) {
+        if (!userResponse.ok) {
+          if (userResponse.status === 404) {
             throw new Error('User not found');
           }
           throw new Error('Failed to fetch user data');
         }
         
-        const userData = await response.json();
+        const userData = await userResponse.json();
         setUser(userData);
+        
+        // Fetch user's public prompts
+        const promptsResponse = await fetch(`/api/users/${username}/prompts`);
+        
+        if (!promptsResponse.ok) {
+          throw new Error('Failed to fetch prompts');
+        }
+        
+        const promptsData = await promptsResponse.json();
+        setPrompts(promptsData);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -28,7 +40,7 @@ const UserProfile = () => {
       }
     };
 
-    fetchUser();
+    fetchData();
   }, [username]);
 
   if (loading) {
@@ -51,30 +63,26 @@ const UserProfile = () => {
     return null;
   }
 
-  // Sample prompts data (normally would come from API)
-  const samplePrompts = [
-    {
-      id: 1,
-      title: "Optimizing React Performance",
-      content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-      date: "3 days ago",
-      tags: ["react", "performance", "optimization"]
-    },
-    {
-      id: 2,
-      title: "Building a Neural Network from Scratch",
-      content: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-      date: "1 week ago",
-      tags: ["python", "machine-learning", "neural-networks"]
-    },
-    {
-      id: 3,
-      title: "Advanced TypeScript Patterns",
-      content: "Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.",
-      date: "2 weeks ago",
-      tags: ["typescript", "patterns", "advanced"]
+  // Function to format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+      return "Today";
+    } else if (diffDays === 1) {
+      return "Yesterday";
+    } else if (diffDays < 7) {
+      return `${diffDays} days ago`;
+    } else if (diffDays < 30) {
+      const weeks = Math.floor(diffDays / 7);
+      return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+    } else {
+      return date.toLocaleDateString();
     }
-  ];
+  };
 
   // Generate a vibrant background gradient based on prompt ID
   const getPromptBackground = (id) => {
@@ -130,37 +138,41 @@ const UserProfile = () => {
         </div>
       </div>
 
-      {/* My Latest Prompts Section */}
+      {/* Latest Prompts Section */}
       <div className="mb-10">
-        <h2 className="text-2xl font-bold text-purple-500 mb-6">My Latest Prompts</h2>
+        <h2 className="text-2xl font-bold text-purple-500 mb-6">Latest Prompts</h2>
         
-        <div className="space-y-6">
-          {samplePrompts.map(prompt => (
-            <div 
-              key={prompt.id} 
-              className={`rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-102 cursor-pointer ${getPromptBackground(prompt.id)}`}
-            >
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-white mb-3">{prompt.title}</h3>
-                <p className="text-gray-100 mb-4">{prompt.content}</p>
-                
-                <div className="flex flex-wrap justify-between items-center">
-                  <div className="flex flex-wrap gap-2 mb-2 md:mb-0">
-                    {prompt.tags.map(tag => (
-                      <span 
-                        key={tag} 
-                        className="bg-black bg-opacity-30 text-white px-3 py-1 rounded-full text-sm"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
+        {prompts.length > 0 ? (
+          <div className="space-y-6">
+            {prompts.map(prompt => (
+              <div 
+                key={prompt.id} 
+                className={`rounded-xl overflow-hidden shadow-lg transform transition-transform hover:scale-102 ${getPromptBackground(prompt.id)}`}
+              >
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-white mb-3">{prompt.title}</h3>
+                  <p className="text-gray-100 mb-4">{prompt.content}</p>
+                  
+                  <div className="flex flex-wrap justify-between items-center">
+                    <div className="flex flex-wrap gap-2 mb-2 md:mb-0">
+                      {prompt.tags.map(tag => (
+                        <span 
+                          key={tag} 
+                          className="bg-black bg-opacity-30 text-white px-3 py-1 rounded-full text-sm"
+                        >
+                          #{tag}
+                        </span>
+                      ))}
+                    </div>
+                    <span className="text-gray-200 text-sm">{formatDate(prompt.created_at)}</span>
                   </div>
-                  <span className="text-gray-200 text-sm">{prompt.date}</span>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-center py-8">No prompts to display</p>
+        )}
       </div>
     </div>
   );

@@ -64,6 +64,13 @@ func main() {
 	api.GET("/homepage-users", handlers.GetHomepageUsers(db))
 	api.GET("/user", handlers.GetCurrentUser(db))
 	api.GET("/users/:username", handlers.GetPublicUserByUsername(db))
+	
+	// Prompt routes
+	api.GET("/prompts", handlers.GetUserPrompts(db))
+	api.POST("/prompts", handlers.CreatePrompt(db))
+	api.PUT("/prompts/:id", handlers.UpdatePrompt(db))
+	api.DELETE("/prompts/:id", handlers.DeletePrompt(db))
+	api.GET("/users/:username/prompts", handlers.GetUserPublicPrompts(db))
 
 	// Admin API routes with admin middleware
 	adminMiddleware := handlers.IsAdmin(db)

@@ -136,6 +136,84 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Prompt management functions
+  const getUserPrompts = async () => {
+    try {
+      const response = await fetch('/api/prompts');
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fetch prompts');
+      }
+      
+      const prompts = await response.json();
+      return { success: true, prompts };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const createPrompt = async (promptData) => {
+    try {
+      const response = await fetch('/api/prompts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(promptData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create prompt');
+      }
+      
+      return { success: true, prompt: data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const updatePrompt = async (promptId, promptData) => {
+    try {
+      const response = await fetch(`/api/prompts/${promptId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(promptData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update prompt');
+      }
+      
+      return { success: true, prompt: data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const deletePrompt = async (promptId) => {
+    try {
+      const response = await fetch(`/api/prompts/${promptId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete prompt');
+      }
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -144,6 +222,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
+    getUserPrompts,
+    createPrompt,
+    updatePrompt,
+    deletePrompt,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
