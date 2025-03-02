@@ -23,14 +23,16 @@ var staticContent embed.FS
 
 func main() {
 	// Initialize database
-	os.Remove("./vibecoders.db") // Remove existing database during development
+	dev := false
+	if dev {
+		os.Remove("./vibecoders.db") // Remove existing database during development
+	}
 	db, err := sql.Open("sqlite3", "./vibecoders.db")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
 
-	// Execute database initialization script
 	initSQL, err := initSQLContent.ReadFile("db/init.sql")
 	if err != nil {
 		log.Fatal(err)
