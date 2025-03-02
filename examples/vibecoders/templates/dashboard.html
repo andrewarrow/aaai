@@ -10,10 +10,65 @@
     <div class="container">
         <h1>{{ .PageTitle }}</h1>
         <div class="task-summary">
-            <p>You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}. 
+            <div id="login-status">
+                <p id="welcome-message">Welcome! Please log in to manage your tasks.</p>
+                <div id="login-form-container">
+                    <form id="login-form">
+                        <div class="form-group">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="password">Password:</label>
+                            <input type="password" id="password" name="password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="login-button">Login</button>
+                            <button type="button" id="register-toggle">Create Account</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="register-form-container" style="display: none;">
+                    <form id="register-form">
+                        <div class="form-group">
+                            <label for="reg-username">Username:</label>
+                            <input type="text" id="reg-username" name="username" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">Password:</label>
+                            <input type="password" id="reg-password" name="password" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-password">Confirm Password:</label>
+                            <input type="password" id="confirm-password" name="confirm-password" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" id="register-button">Register</button>
+                            <button type="button" id="login-toggle">Back to Login</button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="user-logged-in" style="display: none;">
+                    <p>Logged in as <span id="logged-username"></span></p>
+                    <button id="logout-button">Logout</button>
+                </div>
+                
+                <div id="message-container"></div>
+            </div>
+
+            <div id="task-info" style="display: none;">
+              <p>You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}. 
                Let's get organized!{{ else }}. Time to add some tasks!{{ end }}</p>
+            </div>
         </div>
         
+        <div id="task-container" style="display: none;">
+            <div class="task-form">
+                <input type="text" id="new-task" placeholder="Add a new task...">
+                <button id="add-task">Add Task</button>
+            </div>
         {{ if gt .TaskCount 0 }}
             <ul class="task-list">
                 {{ range .Tasks }}
@@ -29,6 +84,9 @@
         {{ else }}
             <div class="empty-list">No tasks yet. Create your first task to get started.</div>
         {{ end }}
+        </div>
     </div>
+    <script src="/static/auth.js"></script>
+    <script src="/static/tasks.js"></script>
 </body>
 </html>

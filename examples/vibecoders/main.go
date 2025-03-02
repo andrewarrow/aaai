@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/labstack/echo/v4" 
-	"github.com/labstack/echo/v4/middleware" 
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -23,9 +23,21 @@ type Task struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-//go:embed templates/*.html static/*.css
-var templateFS embed.FS
+// User represents a user in our application
+type User struct {
+	ID       int    `json:"id"`
+	Username string `json:"username"`
+	Password string `json:"password,omitempty"` // omitempty to not send in responses
+}
 
+// LoginCredentials for login requests
+type LoginCredentials struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+//go:embed templates/*.html static/*.css static/*.js
+var templateFS embed.FS
 
 // Template renderer
 type TemplateRenderer struct {
@@ -44,11 +56,12 @@ func initTemplates() *TemplateRenderer {
 	if err != nil {
 		log.Fatal(err)
 	}
-	
+
 	return &TemplateRenderer{
 		templates: template.Must(template.ParseFS(templatesContent, "*.html")),
-	} 
+	}
 }
+
 var db *sql.DB
 
 func initDB() {
@@ -67,6 +80,18 @@ func initDB() {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);`
 
+	createUsersTableSQL := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username TEXT UNIQUE NOT NULL,
+		password TEXT NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);`
+
+	_, err = db.Exec(createUsersTableSQL)
+	if err != nil {
+		log.Fatal(err)
+	}
 	_, err = db.Exec(createTableSQL)
 	if err != nil {
 		log.Fatal(err)
@@ -83,13 +108,11 @@ func setupStaticFiles(e *echo.Echo) {
 
 	// Create a filesystem HTTP handler
 	fileServer := http.FileServer(http.FS(staticFiles))
-	
+
 	// Register the handler for the /static/ path
 	staticHandler := echo.WrapHandler(http.StripPrefix("/static/", fileServer))
 	e.GET("/static/*", staticHandler)
 }
-
-
 
 func main() {
 	// Initialize database
@@ -111,12 +134,18 @@ func main() {
 	}))
 	e.Use(middleware.CORS())
 
-	// Routes
+	// Page Routes
 	e.GET("/", dashboard)
+
+	// Task API Routes
 	e.GET("/tasks", getTasks)
 	e.POST("/tasks", createTask)
 	e.PUT("/tasks/:id", updateTask)
 	e.DELETE("/tasks/:id", deleteTask)
+
+	// User API Routes
+	e.POST("/api/register", registerUser)
+	e.POST("/api/login", loginUser)
 
 	// Setup static file serving
 	setupStaticFiles(e)
@@ -134,7 +163,7 @@ func dashboard(c echo.Context) error {
 		})
 	}
 	defer rows.Close()
-	
+
 	var tasks []Task
 	for rows.Next() {
 		var t Task
@@ -143,7 +172,7 @@ func dashboard(c echo.Context) error {
 		}
 		tasks = append(tasks, t)
 	}
-	
+
 	data := map[string]interface{}{
 		"PageTitle": "Task Manager Dashboard",
 		"Tasks":     tasks,
@@ -151,6 +180,7 @@ func dashboard(c echo.Context) error {
 	}
 	return c.Render(http.StatusOK, "dashboard.html", data)
 }
+
 // Handler to get all tasks
 
 // Handler to get all tasks

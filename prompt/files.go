@@ -29,7 +29,7 @@ func AssembleFiles(dir string) []FileContent {
 
 		// Only process .go files
 		name := info.Name()
-		if !strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, ".html") && !strings.HasSuffix(name, ".css") {
+		if !strings.HasSuffix(name, ".go") && !strings.HasSuffix(name, ".html") && !strings.HasSuffix(name, ".css") && !strings.HasSuffix(name, ".js") {
 			return nil
 		}
 
