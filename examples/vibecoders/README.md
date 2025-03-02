@@ -1,89 +1,85 @@
-# VibeCoder
+# VibeCoders
 
-A developer-focused social platform built with Go Echo framework, SQLite, Tailwind CSS, and esbuild.
+A platform to find software engineers that are very good at vibecoding.
 
-## Features
-
-- User authentication (registration and login)
-- User profiles with bio, LinkedIn URL, GitHub URL, and profile photo
-- Dark-themed, responsive UI built with Tailwind CSS
-- REST API endpoints
+> "Vibe coding is the art of leveraging AI tools to their fullest potential in software development, creating a seamless fusion between human creativity and machine intelligence. It represents a paradigm shift where developers orchestrate AI systems rather than writing every line manually."
 
 ## Technology Stack
 
-- **Backend**: Go with Echo framework
-- **Database**: SQLite
-- **Frontend**: JavaScript with esbuild bundler
-- **Styling**: Tailwind CSS
+### Frontend
+- React
+- TailwindCSS
+- Vite (for building and development)
 
-## Getting Started
+### Backend
+- Golang
+- Echo framework
+- SQLite
+
+## Features
+
+- Homepage showcasing top "vibecoders"
+- User authentication (register, login, logout)
+- User profiles with customizable information
+- Responsive design for mobile and desktop
+
+## Development
 
 ### Prerequisites
 
-- Go 1.18 or higher
-- Node.js 16 or higher
-- npm or yarn
+- Go 1.19+
+- Node.js 16+
+- npm
 
-### Installation
+### Setup
 
-1. Clone this repository
-```bash
-git clone <repository-url>
-cd vibecoders
-```
+1. Clone the repository
+2. Install Go dependencies:
+   ```
+   go mod tidy
+   ```
+3. Install Node.js dependencies:
+   ```
+   npm install
+   ```
 
-2. Install backend dependencies
-```bash
-go mod tidy
-```
+### Running the application
 
-3. Install frontend dependencies
-```bash
-npm install
-```
+1. Start the frontend development server:
+   ```
+   npm run dev
+   ```
 
-4. Build the frontend assets
-```bash
-npm run build
-npm run build:css
-```
+2. Start the backend server:
+   ```
+   go run main.go
+   ```
 
-### Running the Application
-
-1. Start the server
-```bash
-go run cmd/server/main.go
-```
-
-2. For development with hot-reloading:
-```bash
-npm run dev
-```
-
-3. Visit `http://localhost:3000` in your browser
+3. Access the application at `http://localhost:3000`
 
 ## API Endpoints
 
-- `POST /api/register` - Register a new user
-- `POST /api/login` - Log in a user
-- `GET /api/users/:id` - Get user profile
-- `PUT /api/users/:id` - Update user profile
+- `POST /api/login` - Login user
+- `DELETE /api/logout` - Logout user
+- `POST /api/register` - Register new user
+- `PATCH /api/user` - Update user profile
+- `GET /api/homepage-users` - Get users for homepage
+- `GET /api/user` - Get current user information
 
-## Project Structure
+## Database
 
-```
-vibecoders/
-├── api/
-│   └── handlers/       # HTTP handlers
-├── cmd/
-│   └── server/         # Application entry point
-├── models/             # Database models
-├── static/             # Static assets
-│   ├── src/            # Frontend source files
-│   └── dist/           # Bundled frontend files
-└── templates/          # HTML templates
-```
+SQLite database with the following tables:
 
-## License
+### users
+- id (primary key)
+- username (unique)
+- bio
+- linked_in_url
+- github_url
+- photo_url
+- password
 
-MIT
+### sessions
+- id (primary key)
+- user_id (foreign key)
+- token (random uuid)

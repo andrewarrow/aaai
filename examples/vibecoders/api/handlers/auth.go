@@ -4,134 +4,195 @@ import (
 	"database/sql"
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"vibecoders/models"
+	"vibecoders.com/models"
 )
 
-type Handler struct {
-	DB *sql.DB
-}
-
-// Auth related structs
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
 
 type RegisterRequest struct {
-	Username   string `json:"username"`
-	Password   string `json:"password"`
-	Bio        string `json:"bio"`
-	LinkedinURL string `json:"linkedin_url"`
-	GithubURL  string `json:"github_url"`
-	PhotoURL   string `json:"photo_url"`
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	ConfirmPassword string `json:"confirm_password"`
+	Bio          string `json:"bio"`
+	LinkedInURL  string `json:"linked_in_url"`
+	GithubURL    string `json:"github_url"`
+	PhotoURL     string `json:"photo_url"`
 }
 
 type UpdateUserRequest struct {
-	Bio        string `json:"bio"`
-	LinkedinURL string `json:"linkedin_url"`
-	GithubURL  string `json:"github_url"`
-	PhotoURL   string `json:"photo_url"`
+	Bio         string `json:"bio"`
+	LinkedInURL string `json:"linked_in_url"`
+	GithubURL   string `json:"github_url"`
+	PhotoURL    string `json:"photo_url"`
 }
 
-type AuthResponse struct {
-	Token  string       `json:"token"`
-	User   *models.User `json:"user"`
+func Login(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req LoginRequest
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		}
+
+		user, err := models.GetUserByUsername(db, req.Username)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+			}
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
+		}
+
+		// In a real app, we would use password hashing
+		if user.Password != req.Password {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
+		}
+
+		// Create session
+		token, err := models.CreateSession(db, user.ID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not create session"})
+		}
+
+		// Set cookie
+		cookie := new(http.Cookie)
+		cookie.Name = "session_token"
+		cookie.Value = token
+		cookie.Path = "/"
+		cookie.HttpOnly = true
+		c.SetCookie(cookie)
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "Login successful",
+			"user": map[string]interface{}{
+				"id": user.ID,
+				"username": user.Username,
+			},
+		})
+	}
 }
 
-// RegisterUser handles user registration
-func (h *Handler) RegisterUser(c echo.Context) error {
-	var req RegisterRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+func Logout(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				return c.JSON(http.StatusOK, map[string]string{"message": "Already logged out"})
+			}
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Server error"})
+		}
+
+		// Delete session from database
+		if err := models.DeleteSession(db, cookie.Value); err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not delete session"})
+		}
+
+		// Clear cookie
+		cookie = new(http.Cookie)
+		cookie.Name = "session_token"
+		cookie.Value = ""
+		cookie.Path = "/"
+		cookie.MaxAge = -1
+		c.SetCookie(cookie)
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "Logout successful"})
 	}
-
-	// Validate request
-	if req.Username == "" || req.Password == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Username and password are required"})
-	}
-
-	// Create user
-	user, err := models.CreateUser(h.DB, req.Username, req.Password, req.Bio, req.LinkedinURL, req.GithubURL, req.PhotoURL)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
-
-	// Generate token
-	token := uuid.New().String()
-
-	return c.JSON(http.StatusCreated, AuthResponse{
-		Token: token,
-		User:  user,
-	})
 }
 
-// LoginUser handles user authentication
-func (h *Handler) LoginUser(c echo.Context) error {
-	var req LoginRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+func Register(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		var req RegisterRequest
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		}
+
+		// Validate passwords match
+		if req.Password != req.ConfirmPassword {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Passwords do not match"})
+		}
+
+		// Check if username already exists
+		_, err := models.GetUserByUsername(db, req.Username)
+		if err == nil {
+			return c.JSON(http.StatusConflict, map[string]string{"error": "Username already exists"})
+		} else if err != sql.ErrNoRows {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Database error"})
+		}
+
+		// Create user
+		err = models.CreateUser(db, req.Username, req.Password, req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not create user"})
+		}
+
+		return c.JSON(http.StatusCreated, map[string]string{"message": "User registered successfully"})
 	}
-
-	// Validate request
-	if req.Username == "" || req.Password == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Username and password are required"})
-	}
-
-	// Get user
-	user, err := models.GetUserByUsername(h.DB, req.Username)
-	if err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
-	}
-
-	// Verify password
-	if !models.VerifyPassword(user, req.Password) {
-		return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid credentials"})
-	}
-
-	// Generate token
-	token := uuid.New().String()
-
-	return c.JSON(http.StatusOK, AuthResponse{
-		Token: token,
-		User:  user,
-	})
 }
 
-// UpdateUserProfile handles updating user profile
-func (h *Handler) UpdateUserProfile(c echo.Context) error {
-	userID := c.Param("id")
-	if userID == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
-	}
+func UpdateUser(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Get user ID from session
+		cookie, err := c.Cookie("session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Not logged in"})
+			}
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Server error"})
+		}
 
-	var req UpdateUserRequest
-	if err := c.Bind(&req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
-	}
+		userID, err := models.GetUserIDByToken(db, cookie.Value)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid session"})
+		}
 
-	// Update user
-	user, err := models.UpdateUser(h.DB, userID, req.Bio, req.LinkedinURL, req.GithubURL, req.PhotoURL)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
-	}
+		var req UpdateUserRequest
+		if err := c.Bind(&req); err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid request"})
+		}
 
-	return c.JSON(http.StatusOK, user)
+		// Update user
+		err = models.UpdateUser(db, userID, req.Bio, req.LinkedInURL, req.GithubURL, req.PhotoURL)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not update user"})
+		}
+
+		return c.JSON(http.StatusOK, map[string]string{"message": "User updated successfully"})
+	}
 }
 
-// GetUserProfile retrieves user profile
-func (h *Handler) GetUserProfile(c echo.Context) error {
-	userID := c.Param("id")
-	if userID == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "User ID is required"})
-	}
+func GetHomepageUsers(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		users, err := models.GetTopUsers(db, 3)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not fetch users"})
+		}
 
-	// Get user
-	user, err := models.GetUserByID(h.DB, userID)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]string{"error": "User not found"})
+		return c.JSON(http.StatusOK, users)
 	}
+}
 
-	return c.JSON(http.StatusOK, user)
+func GetCurrentUser(db *sql.DB) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		cookie, err := c.Cookie("session_token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Not logged in"})
+			}
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Server error"})
+		}
+
+		userID, err := models.GetUserIDByToken(db, cookie.Value)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, map[string]string{"error": "Invalid session"})
+		}
+
+		user, err := models.GetUserByID(db, userID)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Could not fetch user"})
+		}
+
+		return c.JSON(http.StatusOK, user)
+	}
 }
