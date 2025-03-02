@@ -135,9 +135,8 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// Page Routes
-	e.GET("/", homePage)
-	e.GET("/dashboard", dashboard)
-	
+	e.GET("/", dashboard)
+
 	// Task API Routes
 	e.GET("/tasks", getTasks)
 	e.POST("/tasks", createTask)
@@ -153,15 +152,6 @@ func main() {
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-// Handler for the home page - shows index or redirects to dashboard
-func homePage(c echo.Context) error {
-	// Just render the index page - client-side JS will redirect if user is logged in
-	data := map[string]interface{}{
-		"PageTitle": "Task Manager",
-	}
-	return c.Render(http.StatusOK, "index.html", data)
 }
 
 // Handler for the dashboard page

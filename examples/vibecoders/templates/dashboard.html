@@ -11,7 +11,7 @@
         <h1>{{ .PageTitle }}</h1>
         <div class="task-summary">
             <div id="login-status">
-                <p id="welcome-message" style="display: none;">Welcome! Please log in to manage your tasks.</p>
+                <p id="welcome-message">Welcome! Please log in to manage your tasks.</p>
                 <div id="login-form-container">
                     <form id="login-form">
                         <div class="form-group">
@@ -51,15 +51,15 @@
                 </div>
                 
                 <div id="user-logged-in" style="display: none;">
-                    <p>Logged in as <span id="logged-username"></span> | <a href="/">Home</a></p>
+                    <p>Logged in as <span id="logged-username"></span></p>
                     <button id="logout-button">Logout</button>
                 </div>
                 
                 <div id="message-container"></div>
             </div>
 
-            <div id="task-info">
-              <p>You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}.
+            <div id="task-info" style="display: none;">
+              <p>You have <strong>{{ .TaskCount }}</strong> tasks in your list{{ if gt .TaskCount 0 }}. 
                Let's get organized!{{ else }}. Time to add some tasks!{{ end }}</p>
             </div>
         </div>
