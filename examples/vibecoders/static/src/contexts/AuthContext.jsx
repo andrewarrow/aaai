@@ -214,6 +214,84 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Project management functions
+  const getUserProjects = async () => {
+    try {
+      const response = await fetch('/api/projects');
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to fetch projects');
+      }
+      
+      const projects = await response.json();
+      return { success: true, projects };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const createProject = async (projectData) => {
+    try {
+      const response = await fetch('/api/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create project');
+      }
+      
+      return { success: true, project: data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const updateProject = async (projectId, projectData) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(projectData),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to update project');
+      }
+      
+      return { success: true, project: data };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+  
+  const deleteProject = async (projectId) => {
+    try {
+      const response = await fetch(`/api/projects/${projectId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to delete project');
+      }
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  };
+
   const value = {
     user,
     loading,
@@ -226,6 +304,10 @@ export const AuthProvider = ({ children }) => {
     createPrompt,
     updatePrompt,
     deletePrompt,
+    getUserProjects,
+    createProject,
+    updateProject,
+    deleteProject,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

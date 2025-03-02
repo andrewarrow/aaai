@@ -71,6 +71,13 @@ func main() {
 	api.PUT("/prompts/:id", handlers.UpdatePrompt(db))
 	api.DELETE("/prompts/:id", handlers.DeletePrompt(db))
 	api.GET("/users/:username/prompts", handlers.GetUserPublicPrompts(db))
+	
+	// Project routes
+	api.GET("/projects", handlers.GetUserProjects(db))
+	api.POST("/projects", handlers.CreateProject(db))
+	api.PUT("/projects/:id", handlers.UpdateProject(db))
+	api.DELETE("/projects/:id", handlers.DeleteProject(db))
+	api.GET("/users/:username/projects", handlers.GetUserPublicProjects(db))
 
 	// Admin API routes with admin middleware
 	adminMiddleware := handlers.IsAdmin(db)
