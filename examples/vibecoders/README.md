@@ -83,3 +83,33 @@ SQLite database with the following tables:
 - id (primary key)
 - user_id (foreign key)
 - token (random uuid)
+
+### Database Migrations
+
+This project uses Flyway for database migrations:
+
+1. Install Flyway CLI: https://flywaydb.org/documentation/usage/commandline/
+
+2. Initialize the database (creates database file and runs migrations):
+   ```
+   npm run db:init
+   ```
+
+3. Run migrations only:
+   ```
+   npm run db:migrate
+   ```
+
+4. Check migration status:
+   ```
+   npm run db:info
+   ```
+
+5. Clean database (delete all tables):
+   ```
+   npm run db:clean
+   ```
+
+Migration files are located in `db/migration` and follow Flyway naming conventions:
+- `V1__Create_initial_schema.sql` - Creates the database schema
+- `V2__Insert_seed_data.sql` - Inserts initial seed data

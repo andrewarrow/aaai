@@ -15,32 +15,31 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-//go:embed db/init.sql
-var initSQLContent embed.FS
-
 //go:embed static/dist
 var staticContent embed.FS
 
 func main() {
-	// Initialize database
-	dev := false
-	if dev {
-		os.Remove("./vibecoders.db") // Remove existing database during development
+	// Initialize database connection
+	// Database is expected to be migrated using Flyway before server startup
+	dbPath := "./db/vibecoders.db"
+	
+	// Check if database exists
+	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
+		log.Fatalf("Database %s not found. Please run migrations first with: npm run db:migrate", dbPath)
 	}
-	db, err := sql.Open("sqlite3", "./vibecoders.db")
+	
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
-
-	initSQL, err := initSQLContent.ReadFile("db/init.sql")
-	if err != nil {
-		log.Fatal(err)
+	
+	// Verify database connection
+	if err := db.Ping(); err != nil {
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	_, err = db.Exec(string(initSQL))
-	if err != nil {
-		log.Fatal(err)
-	}
+	
+	log.Println("Successfully connected to database")
 
 	// Initialize Echo
 	e := echo.New()

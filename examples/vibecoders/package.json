@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "db:init": "./db/init_db.sh",
+    "db:migrate": "flyway -configFiles=db/flyway.conf migrate",
+    "db:clean": "flyway -configFiles=db/flyway.conf clean",
+    "db:info": "flyway -configFiles=db/flyway.conf info"
   },
   "keywords": [
     "vibecoding",
