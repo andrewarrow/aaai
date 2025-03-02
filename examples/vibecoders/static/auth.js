@@ -12,8 +12,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const messageContainer = document.getElementById('message-container');
     const taskContainer = document.getElementById('task-container');
     const taskInfo = document.getElementById('task-info');
-    const welcomeMessage = document.getElementById('welcome-message');
-
+    const splashContent = document.getElementById('splash-content');
+    const navbarLoggedOut = document.getElementById('navbar-logged-out');
+    const navbarLoggedIn = document.getElementById('navbar-logged-in');
+    const loginButton = document.getElementById('login-button-nav');
+    const registerButton = document.getElementById('register-button-nav');
+    
     // Check if user is already logged in (from localStorage)
     checkLoginStatus();
 
@@ -27,6 +31,14 @@ document.addEventListener('DOMContentLoaded', function() {
         registerFormContainer.style.display = 'none';
         loginFormContainer.style.display = 'block';
     });
+
+    // Open login/register forms from navbar buttons
+    if (loginButton) {
+        loginButton.addEventListener('click', () => loginFormContainer.style.display = 'block');
+    }
+    if (registerButton) {
+        registerButton.addEventListener('click', () => registerFormContainer.style.display = 'block');
+    }
 
     // Handle login form submission
     loginForm.addEventListener('submit', function(e) {
@@ -108,6 +120,17 @@ document.addEventListener('DOMContentLoaded', function() {
         showMessage('Logged out successfully', 'success');
     });
 
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === loginFormContainer) {
+            loginFormContainer.style.display = 'none';
+        }
+        
+        if (event.target === registerFormContainer) {
+            registerFormContainer.style.display = 'none';
+        }
+    });
+
     // Helper function to display messages
     function showMessage(message, type) {
         messageContainer.textContent = message;
@@ -124,21 +147,27 @@ document.addEventListener('DOMContentLoaded', function() {
         loginFormContainer.style.display = 'none';
         registerFormContainer.style.display = 'none';
         userLoggedIn.style.display = 'block';
+        navbarLoggedIn.style.display = 'block';
+        navbarLoggedOut.style.display = 'none';
         loggedUsername.textContent = username;
-        welcomeMessage.style.display = 'none';
+        
+        if (splashContent) {
+            splashContent.style.display = 'none';
+        }
         taskContainer.style.display = 'block';
         taskInfo.style.display = 'block';
     }
 
     // Update UI after logout
     function updateUIAfterLogout() {
+        navbarLoggedIn.style.display = 'none';
+        navbarLoggedOut.style.display = 'block';
         userLoggedIn.style.display = 'none';
-        loginFormContainer.style.display = 'block';
-        welcomeMessage.style.display = 'block';
-        taskContainer.style.display = 'none';
-        taskInfo.style.display = 'none';
+        loginFormContainer.style.display = 'none';
+        if (splashContent) splashContent.style.display = 'block';
     }
 
+    // Check if user is already logged in
     // Check if user is already logged in
     function checkLoginStatus() {
         const user = JSON.parse(localStorage.getItem('user'));
